@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Pembayaran Iuran PB SINAR PAGI 2026</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --accent: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        h1, h2 {
+            margin: 5px 0;
+            color: var(--primary);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .card.highlight {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .card-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .form-add {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background-color: var(--accent);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 6px 4px;
+            white-space: nowrap;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background-color: #e2e8f0;
+            z-index: 10;
+        }
+
+        th.month-header {
+            width: 35px;
+        }
+
+        th.mar-header, td.mar-cell {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .checkbox-iuran {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        td.text-left {
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        td.text-right {
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .editable-name {
+            cursor: pointer;
+        }
+        
+        .editable-name:hover {
+            text-decoration: underline;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h2>PERSATUAN BULU TANGKIS SINAR PAGI (PB SINAR PAGI)</h2>
+        <h1>DAFTAR PEMBAYARAN IURAN TAHUN 2026</h1>
+        <p style="margin:0; font-size: 0.9rem; color: #64748b;">Nominal Iuran: <b>Rp 10.000 / orang / bulan</b></p>
+    </header>
+
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-title">Saldo Des 2025 (Awal)</div>
+            <div class="card-value" id="saldoAwalDisplay">Rp 400.000</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Total Terkumpul (2026)</div>
+            <div class="card-value" id="totalIuranDisplay">Rp 0</div>
+        </div>
+        <div class="card highlight">
+            <div class="card-title">Total Saldo Akhir</div>
+            <div class="card-value" id="totalSaldoDisplay">Rp 0</div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <div class="form-add">
+            <input type="text" id="namaBaru" placeholder="Nama Anggota Baru...">
+            <button onclick="tambahAnggota()">+ Tambah Anggota</button>
+        </div>
+        <div>
+            <label><b>Saldo Awal (Rp): </b></label>
+            <input type="number" id="inputSaldoAwal" value="400000" style="width: 120px;" onchange="updateSaldoAwal()">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 40px;">NO</th>
+                    <th rowspan="2">NAMA ANGGOTA</th>
+                    <th colspan="12">IURAN BULANAN (2026)</th>
+                    <th rowspan="2">TOTAL</th>
+                    <th rowspan="2">SALDO AKUMULASI</th>
+                    <th rowspan="2">KET</th>
+                    <th rowspan="2">AKSI</th>
+                </tr>
+                <tr>
+                    <th class="month-header">Jan</th>
+                    <th class="month-header">Feb</th>
+                    <th class="month-header mar-header">Mar</th>
+                    <th class="month-header">Apr</th>
+                    <th class="month-header">Mei</th>
+                    <th class="month-header">Jun</th>
+                    <th class="month-header">Jul</th>
+                    <th class="month-header">Ags</th>
+                    <th class="month-header">Sep</th>
+                    <th class="month-header">Okt</th>
+                    <th class="month-header">Nop</th>
+                    <th class="month-header">Des</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data dimasukkan secara dinamis via JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr style="font-weight: bold; background-color: #e2e8f0;">
+                    <td colspan="14" class="text-right">TOTAL IURAN TERKUMPUL</td>
+                    <td id="grandTotal" class="text-right">Rp 0</td>
+                    <td id="finalSaldo" class="text-right">Rp 0</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script>
+    const NOMINAL_IURAN = 10000;
+    let saldoAwal = 400000;
+
+    // Data awal berdasarkan gambar
+    let dataAnggota = [
+        { nama: "Ust IRWAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "Maret puasa" },
+        { nama: "BAHAR", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "KADRI", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "A.EDI", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "IBRAHIM", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
+        { nama: "AWI", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "HARMAN", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "CINO", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "HENGKI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "H.RUSDI", iuran: [1,1,0,1,1,1,1,1,1,1,1,0], ket: "" },
+        { nama: "SYAM", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "IMRAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "INDRA", iuran: [1,0,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "P.YUS", iuran: [1,0,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "ANTO Dispenda", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "MASDAR", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
+        { nama: "DhausJie", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "H.ICCANG", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "RIVAL", iuran: [0,0,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "H.SUNDU", iuran: [0,0,0,1,1,0,1,0,0,0,0,0], ket: "" },
+        { nama: "A.ROBY", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "H.FAHRI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "SABRI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "YUDHI", iuran: [1,1,0,1,1,0,0,0,0,0,0,0], ket: "" },
+        { nama: "H.TAHAR", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "AAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
+        { nama: "JUMAING", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "YesSAFRI", iuran: [1,1,0,1,1,0,1,0,0,0,0,0], ket: "" },
+        { nama: "H.KARMAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
+        { nama: "PABO", iuran: [0,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "YONO", iuran: [1,0,0,0,1,0,0,0,0,0,0,0], ket: "" },
+        { nama: "KEVIN", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "AGUS.M", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "AGUS ASKARI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "MARDI", iuran: [0,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "SOEHA", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "HENRIK", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "ALI", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
+        { nama: "MASKITIN", iuran: [1,0,0,0,0,0,1,0,0,0,0,0], ket: "" },
+        { nama: "HAERUL", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "H.ABUSTAN", iuran: [1,1,0,1,1,1,1,1,1,0,0,0], ket: "" },
+        { nama: "ARDIAN", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
+        { nama: "A.KOMAR", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
+        { nama: "A.ALFIAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
+        { nama: "FIRDAUS Sijelling", iuran: [1,1,0,1,1,1,1,1,1,0,0,0], ket: "" },
+        { nama: "BENTO", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
+        { nama: "SAMIR", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "MUHSIN", iuran: [0,1,0,1,0,1,1,0,0,0,0,0], ket: "" },
+        { nama: "A.ACO", iuran: [0,1,0,1,0,1,0,0,0,0,0,0], ket: "" },
+        { nama: "WIRA", iuran: [1,1,0,1,0,1,0,0,0,0,0,0], ket: "" },
+        { nama: "RUSLI", iuran: [0,0,0,1,1,1,1,1,1,1,0,0], ket: "" },
+        { nama: "ANTO B", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
+        { nama: "ZULFIQAR", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
+        { nama: "IRHAM", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
+        { nama: "IBNU", iuran: [0,0,0,0,0,0,1,0,0,0,0,0], ket: "" }
+    ];
+
+    function formatRupiah(angka) {
+        return "Rp " + angka.toLocaleString('id-ID');
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        let runningSaldo = saldoAwal;
+        let totalSeluruhIuran = 0;
+
+        dataAnggota.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            
+            // Hitung total iuran per orang
+            const totalBulanTerbayar = item.iuran.reduce((a, b) => a + b, 0);
+            const totalBayar = totalBulanTerbayar * NOMINAL_IURAN;
+            
+            totalSeluruhIuran += totalBayar;
+            runningSaldo += totalBayar;
+
+            // HTML Kolom No & Nama
+            let rowHtml = `
+                <td>${index + 1}</td>
+                <td class="text-left editable-name" onclick="editNama(${index})">${item.nama}</td>
+            `;
+
+            // HTML Kolom Bulan (12 bulan)
+            item.iuran.forEach((val, bulanIdx) => {
+                const isMar = bulanIdx === 2 ? 'mar-cell' : '';
+                const checked = val === 1 ? 'checked' : '';
+                rowHtml += `
+                    <td class="${isMar}">
+                        <input type="checkbox" class="checkbox-iuran" ${checked} onchange="toggleIuran(${index}, ${bulanIdx})">
+                    </td>
+                `;
+            });
+
+            // HTML Kolom Total, Saldo, Ket, & Akses
+            rowHtml += `
+                <td class="text-right">${formatRupiah(totalBayar)}</td>
+                <td class="text-right" style="font-weight:600">${formatRupiah(runningSaldo)}</td>
+                <td><input type="text" value="${item.ket || ''}" style="width: 90px; font-size:0.8rem;" onchange="updateKet(${index}, this.value)"></td>
+                <td><button class="btn-danger" onclick="hapusAnggota(${index})">Hapus</button></td>
+            `;
+
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+        });
+
+        // Update Ringkasan
+        document.getElementById('saldoAwalDisplay').innerText = formatRupiah(saldoAwal);
+        document.getElementById('totalIuranDisplay').innerText = formatRupiah(totalSeluruhIuran);
+        document.getElementById('totalSaldoDisplay').innerText = formatRupiah(runningSaldo);
+        document.getElementById('grandTotal').innerText = formatRupiah(totalSeluruhIuran);
+        document.getElementById('finalSaldo').innerText = formatRupiah(runningSaldo);
+    }
+
+    function toggleIuran(indexAnggota, indexBulan) {
+        dataAnggota[indexAnggota].iuran[indexBulan] = dataAnggota[indexAnggota].iuran[indexBulan] === 1 ? 0 : 1;
+        renderTable();
+    }
+
+    function updateKet(index, nilai) {
+        dataAnggota[index].ket = nilai;
+    }
+
+    function editNama(index) {
+        const namaBaru = prompt("Ubah Nama Anggota:", dataAnggota[index].nama);
+        if (namaBaru !== null && namaBaru.trim() !== "") {
+            dataAnggota[index].nama = namaBaru.trim();
+            renderTable();
+        }
+    }
+
+    function tambahAnggota() {
+        const inputNama = document.getElementById('namaBaru');
+        const nama = inputNama.value.trim();
+        if (nama === "") {
+            alert("Nama tidak boleh kosong!");
+            return;
+        }
+
+        dataAnggota.push({
+            nama: nama,
+            iuran: [0,0,0,0,0,0,0,0,0,0,0,0],
+            ket: ""
+        });
+
+        inputNama.value = "";
+        renderTable();
+    }
+
+    function hapusAnggota(index) {
+        if (confirm(`Yakin ingin menghapus ${dataAnggota[index].nama}?`)) {
+            dataAnggota.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    function updateSaldoAwal() {
+        const val = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
+        saldoAwal = val;
+        renderTable();
+    }
+
+    // Inisialisasi Tampilan
+    renderTable();
+</script>
+
+</body>
+</html>
