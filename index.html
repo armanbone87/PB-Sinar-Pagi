@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Keuangan PB SINAR PAGI KABUPATEN BONE 2026</title>
+    <!-- Firebase SDK (v9 Compatibility) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -35,7 +38,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        /* BARIS AUTHENTICATION & LOGIN */
         .auth-bar {
             display: flex;
             justify-content: flex-end;
@@ -52,8 +54,15 @@
             font-size: 0.9rem;
         }
 
-        .btn-login {
-            background-color: var(--primary);
+        .db-status {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            font-weight: bold;
+        }
+
+        .btn-login, .btn-logout, .btn-save-all, .btn-reset {
             color: white;
             padding: 8px 16px;
             border: none;
@@ -62,38 +71,11 @@
             font-weight: 600;
         }
 
-        .btn-logout {
-            background-color: var(--accent);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: none;
-        }
+        .btn-login { background-color: var(--primary); }
+        .btn-logout { background-color: var(--accent); display: none; }
+        .btn-save-all { background-color: #2563eb; }
+        .btn-reset { background-color: #64748b; }
 
-        .btn-save-all {
-            background-color: #2563eb;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-reset {
-            background-color: #64748b;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* MODAL POPUP */
         .modal {
             display: none;
             position: fixed;
@@ -148,7 +130,6 @@
         h1 { margin: 5px 0; color: var(--primary); font-size: 1.8rem; text-transform: uppercase; }
         h2 { margin: 0; color: #475569; font-size: 1.2rem; font-weight: 600; }
 
-        /* TABS */
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -177,7 +158,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* CARDS */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -199,7 +179,6 @@
         .card-title { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: bold; }
         .card-value { font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
 
-        /* CONTROLS */
         .controls {
             display: flex;
             justify-content: space-between;
@@ -239,7 +218,6 @@
         .btn-success { background-color: #10b981; }
         .btn-danger { background-color: var(--accent); padding: 4px 8px; font-size: 0.8rem; }
 
-        /* TABLES */
         .table-responsive {
             overflow-x: auto;
             max-height: 600px;
@@ -262,7 +240,6 @@
         .admin-mode .editable-name { cursor: pointer; }
         .admin-mode .editable-name:hover { color: var(--primary); text-decoration: underline; }
 
-        /* BUKU KAS STYLES */
         .header-pemasukan { background-color: #bae6fd; color: #0369a1; }
         .header-pengeluaran { background-color: #bbf7d0; color: #15803d; }
         .header-saldo { background-color: #e9d5ff; color: #6b21a8; }
@@ -280,7 +257,6 @@
             margin-left: 5px;
         }
 
-        /* ADMIN CONTROL VISIBILITY */
         .admin-only { display: none !important; }
         .admin-mode .admin-only { display: inline-flex !important; }
         .admin-mode tr.admin-only, .admin-mode div.admin-only { display: flex !important; }
@@ -290,11 +266,9 @@
 <body>
 
 <div class="container" id="mainContainer">
-    <!-- BARIS KONTROL LOGIN -->
     <div class="auth-bar">
         <span id="userStatus" class="user-status">Status: <span>Pengunjung (Read-Only)</span></span>
-        <button id="btnSaveData" class="btn-save-all admin-only" onclick="simpanKeStorage(true)">💾 Simpan Data</button>
-        <button id="btnResetData" class="btn-reset admin-only" onclick="resetDataBawaan()">🔄 Reset Default</button>
+        <span id="dbStatus" class="db-status">🟡 Menghubungkan Cloud...</span>
         <button id="btnLogin" class="btn-login" onclick="openLoginModal()">Login Admin</button>
         <button id="btnLogout" class="btn-logout" onclick="logoutAdmin()">Logout</button>
     </div>
@@ -304,7 +278,6 @@
         <h1>SISTEM KEUANGAN & BUKU KAS UMUM TAHUN 2026</h1>
     </header>
 
-    <!-- NAVIGATION TABS -->
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('kas', event)">📖 BUKU KAS UMUM</button>
         <button class="tab-btn" onclick="openTab('iuran', event)">🏸 DAFTAR IURAN ANGGOTA</button>
@@ -356,7 +329,7 @@
                 <button class="btn-success" onclick="tambahTransaksiKas()">+ Simpan Transaksi</button>
             </div>
             <div>
-                <span class="sync-badge">SINKRON OTOMATIS</span> Keterangan "Terima Iuran" terhubung langsung dengan Kartu Iuran Ags 2026.
+                <span class="sync-badge">CLOUD SYNC</span> Data tersinkron otomatis antar perangkat secara real-time.
             </div>
         </div>
 
@@ -401,38 +374,6 @@
                         <td id="bPersahabatan" class="text-right bg-pengeluaran">0</td>
                         <td id="bLainOut" class="text-right bg-pengeluaran">0</td>
                         <td id="bSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td></td>
-                        <td class="admin-only"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="text-right">TOTAL TRANSAKSI S/D BULAN INI</td>
-                        <td id="sIuran" class="text-right bg-pemasukan">0</td>
-                        <td id="sJualBola" class="text-right bg-pemasukan">0</td>
-                        <td id="sKontribusi" class="text-right bg-pemasukan">0</td>
-                        <td id="sLainIn" class="text-right bg-pemasukan">0</td>
-                        <td id="sBeliBola" class="text-right bg-pengeluaran">0</td>
-                        <td id="sRapat" class="text-right bg-pengeluaran">0</td>
-                        <td id="sInsentif" class="text-right bg-pengeluaran">0</td>
-                        <td id="sSewaLap" class="text-right bg-pengeluaran">0</td>
-                        <td id="sPersahabatan" class="text-right bg-pengeluaran">0</td>
-                        <td id="sLainOut" class="text-right bg-pengeluaran">0</td>
-                        <td id="sSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td></td>
-                        <td class="admin-only"></td>
-                    </tr>
-                    <tr style="background-color: #e2e8f0;">
-                        <td colspan="3" class="text-right">TOTAL TRANSAKSI KOMULATIF</td>
-                        <td id="kIuran" class="text-right bg-pemasukan">0</td>
-                        <td id="kJualBola" class="text-right bg-pemasukan">0</td>
-                        <td id="kKontribusi" class="text-right bg-pemasukan">0</td>
-                        <td id="kLainIn" class="text-right bg-pemasukan">0</td>
-                        <td id="kBeliBola" class="text-right bg-pengeluaran">0</td>
-                        <td id="kRapat" class="text-right bg-pengeluaran">0</td>
-                        <td id="kInsentif" class="text-right bg-pengeluaran">0</td>
-                        <td id="kSewaLap" class="text-right bg-pengeluaran">0</td>
-                        <td id="kPersahabatan" class="text-right bg-pengeluaran">0</td>
-                        <td id="kLainOut" class="text-right bg-pengeluaran">0</td>
-                        <td id="kSaldoBulan" class="text-right bg-saldo">0</td>
                         <td></td>
                         <td class="admin-only"></td>
                     </tr>
@@ -502,7 +443,7 @@
     </div>
 </div>
 
-<!-- MODAL POPUP LOGIN -->
+<!-- MODAL LOGIN -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeLoginModal()">&times;</span>
@@ -521,130 +462,67 @@
 </div>
 
 <script>
+    // --- KONFIGURASI FIREBASE ---
+    // Ganti dengan kredensial dari Firebase Console Anda!
+    const firebaseConfig = {
+    apiKey: "AIzaSyCMjG9thg1hLv7fjZjvRvPicg4rDyWPCaE",
+    authDomain: "pb-sinar-pagi.firebaseapp.com",
+    databaseURL: "https://pb-sinar-pagi-default-rtdb.firebaseio.com",
+    projectId: "pb-sinar-pagi",
+    storageBucket: "pb-sinar-pagi.firebasestorage.app",
+    messagingSenderId: "980167000610",
+    appId: "1:980167000610:web:8bb4150ce7000d4ee8407b"
+  };
+
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const NOMINAL_IURAN = 10000;
     let saldoAwalIuran = 400000;
     let isAdminLoggedIn = false;
 
-    // Saldo Akumulasi Bulan Sebelumnya (Buku Kas Umum)
     const saldoSebelumnyaKas = {
         iuran: 3160000, jualBola: 25650000, kontribusi: 7400000, lainIn: 1480000,
         beliBola: 16320000, rapat: 824500, insentif: 2750000, sewaLap: 3200000,
         persahabatan: 9263000, lainOut: 4782500, saldo: 550000
     };
 
-    // Data Bawaan (Default)
-    const defaultTransaksiKas = [
-        { id: 1, tanggal: "1-5 Ags 2026", uraian: "Terima Iuran", kategori: "in_iuran", nominal: 180000, isSyncIuran: true, ket: "" },
-        { id: 2, tanggal: "31/07/2026", uraian: "Beli Bola 10 Slop", kategori: "out_beliBola", nominal: 1550000, isSyncIuran: false, ket: "" },
-        { id: 3, tanggal: "05/08/2026", uraian: "Terima Uang Penjualan Bola 10 Slop", kategori: "in_jualBola", nominal: 2400000, isSyncIuran: false, ket: "" },
-        { id: 4, tanggal: "05/08/2026", uraian: "Pembayaran Sewa Lapangan & Insentif", kategori: "multi", multiDetail: { out_insentif: 600000, out_sewaLap: 700000 }, nominal: 1300000, isSyncIuran: false, ket: "" }
-    ];
-
-    const defaultDataAnggota = [
-        { nama: "Ust IRWAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "Maret puasa" },
-        { nama: "BAHAR", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "KADRI", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "A.EDI", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "IBRAHIM", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
-        { nama: "AWI", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "HARMAN", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "CINO", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "HENGKI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "H.RUSDI", iuran: [1,1,0,1,1,1,1,1,1,1,1,0], ket: "" },
-        { nama: "SYAM", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "IMRAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "INDRA", iuran: [1,0,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "P.YUS", iuran: [1,0,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "ANTO Dispenda", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "MASDAR", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
-        { nama: "DhausJie", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "H.ICCANG", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "RIVAL", iuran: [0,0,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "H.SUNDU", iuran: [0,0,0,1,1,0,1,0,0,0,0,0], ket: "" },
-        { nama: "A.ROBY", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "H.FAHRI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "SABRI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "YUDHI", iuran: [1,1,0,1,1,0,0,0,0,0,0,0], ket: "" },
-        { nama: "H.TAHAR", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "AAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
-        { nama: "JUMAING", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "YesSAFRI", iuran: [1,1,0,1,1,0,1,0,0,0,0,0], ket: "" },
-        { nama: "H.KARMAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
-        { nama: "PABO", iuran: [0,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "YONO", iuran: [1,0,0,0,1,0,0,0,0,0,0,0], ket: "" },
-        { nama: "KEVIN", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "AGUS.M", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "AGUS ASKARI", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "MARDI", iuran: [0,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "SOEHA", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "HENRIK", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "ALI", iuran: [1,1,0,1,1,1,0,0,0,0,0,0], ket: "" },
-        { nama: "MASKITIN", iuran: [1,0,0,0,0,0,1,0,0,0,0,0], ket: "" },
-        { nama: "HAERUL", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "H.ABUSTAN", iuran: [1,1,0,1,1,1,1,1,1,0,0,0], ket: "" },
-        { nama: "ARDIAN", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
-        { nama: "A.KOMAR", iuran: [1,1,0,1,1,1,1,1,1,1,1,1], ket: "" },
-        { nama: "A.ALFIAN", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
-        { nama: "FIRDAUS Sijelling", iuran: [1,1,0,1,1,1,1,1,1,0,0,0], ket: "" },
-        { nama: "BENTO", iuran: [1,0,0,0,0,0,0,0,0,0,0,0], ket: "" },
-        { nama: "SAMIR", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "MUHSIN", iuran: [0,1,0,1,0,1,1,0,0,0,0,0], ket: "" },
-        { nama: "A.ACO", iuran: [0,1,0,1,0,1,0,0,0,0,0,0], ket: "" },
-        { nama: "WIRA", iuran: [1,1,0,1,0,1,0,0,0,0,0,0], ket: "" },
-        { nama: "RUSLI", iuran: [0,0,0,1,1,1,1,1,1,1,0,0], ket: "" },
-        { nama: "ANTO B", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
-        { nama: "ZULFIQAR", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
-        { nama: "IRHAM", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
-        { nama: "IBNU", iuran: [0,0,0,0,0,0,1,0,0,0,0,0] }
-    ];
-
     let transaksiKas = [];
     let dataAnggota = [];
 
-    // --- FUNGSI PERSISTENSI STORAGE ---
-    function muatDataDariStorage() {
-        const savedKas = localStorage.getItem('pb_sinar_pagi_transaksiKas');
-        const savedIuran = localStorage.getItem('pb_sinar_pagi_dataAnggota');
-        const savedSaldoAwal = localStorage.getItem('pb_sinar_pagi_saldoAwal');
+    // --- MENGHUBUNGKAN KE CLOUD REALTIME DATABASE ---
+    db.ref('keuangan').on('value', (snapshot) => {
+        const data = snapshot.val();
+        document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
+        document.getElementById('dbStatus').style.background = '#dcfce7';
+        document.getElementById('dbStatus').style.color = '#15803d';
 
-        transaksiKas = savedKas ? JSON.parse(savedKas) : JSON.parse(JSON.stringify(defaultTransaksiKas));
-        dataAnggota = savedIuran ? JSON.parse(savedIuran) : JSON.parse(JSON.stringify(defaultDataAnggota));
-        saldoAwalIuran = savedSaldoAwal ? parseInt(savedSaldoAwal) : 400000;
-
-        document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
-    }
-
-    function simpanKeStorage(showAlert = false) {
-        localStorage.setItem('pb_sinar_pagi_transaksiKas', JSON.stringify(transaksiKas));
-        localStorage.setItem('pb_sinar_pagi_dataAnggota', JSON.stringify(dataAnggota));
-        localStorage.setItem('pb_sinar_pagi_saldoAwal', saldoAwalIuran);
-        
-        if (showAlert) {
-            alert('Semua perubahan data iuran & transaksi berhasil disimpan ke memori!');
-        }
-    }
-
-    function resetDataBawaan() {
-        if (!isAdminLoggedIn) return;
-        if (confirm("Apakah Anda yakin ingin mengembalikan data ke pengaturan awal (Default)? Semua update terbaru akan diganti.")) {
-            localStorage.removeItem('pb_sinar_pagi_transaksiKas');
-            localStorage.removeItem('pb_sinar_pagi_dataAnggota');
-            localStorage.removeItem('pb_sinar_pagi_saldoAwal');
-            muatDataDariStorage();
+        if (data) {
+            transaksiKas = data.transaksiKas || [];
+            dataAnggota = data.dataAnggota || [];
+            saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
+            document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
             renderIuran();
-            alert('Data telah dikembalikan ke kondisi default!');
         }
+    }, (error) => {
+        document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
+        document.getElementById('dbStatus').style.background = '#fee2e2';
+        document.getElementById('dbStatus').style.color = '#b91c1c';
+    });
+
+    function simpanKeCloud() {
+        if (!isAdminLoggedIn) return;
+        db.ref('keuangan').set({
+            transaksiKas: transaksiKas,
+            dataAnggota: dataAnggota,
+            saldoAwal: saldoAwalIuran
+        });
     }
 
     /* SYSTEM AUTENTIKASI */
-    function openLoginModal() {
-        document.getElementById('loginModal').style.display = 'block';
-    }
-
-    function closeLoginModal() {
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('errorMsg').style.display = 'none';
-    }
+    function openLoginModal() { document.getElementById('loginModal').style.display = 'block'; }
+    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('errorMsg').style.display = 'none'; }
 
     function prosesLogin() {
         const u = document.getElementById('username').value;
@@ -654,7 +532,6 @@
             isAdminLoggedIn = true;
             closeLoginModal();
             updateAuthUI();
-            alert('Login Admin Berhasil!');
         } else {
             document.getElementById('errorMsg').style.display = 'block';
         }
@@ -665,7 +542,6 @@
         document.getElementById('username').value = '';
         document.getElementById('password').value = '';
         updateAuthUI();
-        alert('Anda telah logout. Kembali ke mode Pengunjung.');
     }
 
     function updateAuthUI() {
@@ -688,7 +564,6 @@
             btnLogout.style.display = 'none';
             inputSaldo.setAttribute('disabled', 'true');
         }
-
         renderIuran();
     }
 
@@ -700,16 +575,14 @@
     function openTab(tabName, evt) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
         document.getElementById(tabName).classList.add('active');
         evt.currentTarget.classList.add('active');
     }
 
-    // --- SINKRONISASI IURAN KE BUKU KAS ---
     function syncIuranToKas() {
         let totalIuranAgustus = 0;
         dataAnggota.forEach(m => {
-            if (m.iuran[7] === 1) totalIuranAgustus += NOMINAL_IURAN;
+            if (m.iuran && m.iuran[7] === 1) totalIuranAgustus += NOMINAL_IURAN;
         });
 
         let iuranTrans = transaksiKas.find(t => t.isSyncIuran);
@@ -718,7 +591,6 @@
         }
     }
 
-    // --- RENDER BUKU KAS ---
     function renderBukuKas() {
         syncIuranToKas();
         const tbody = document.getElementById('kasTableBody');
@@ -794,7 +666,6 @@
             tbody.appendChild(tr);
         });
 
-        // Totals Bulan Ini
         document.getElementById('bIuran').innerText = formatRupiah(b.iuran);
         document.getElementById('bJualBola').innerText = formatRupiah(b.jualBola);
         document.getElementById('bKontribusi').innerText = formatRupiah(b.kontribusi);
@@ -807,36 +678,6 @@
         document.getElementById('bLainOut').innerText = formatRupiah(b.lainOut);
         document.getElementById('bSaldoBulan').innerText = formatRupiah(currentSaldo);
 
-        // Totals S/D Bulan Ini & Komulatif
-        let s = {
-            iuran: saldoSebelumnyaKas.iuran + b.iuran,
-            jualBola: saldoSebelumnyaKas.jualBola + b.jualBola,
-            kontribusi: saldoSebelumnyaKas.kontribusi + b.kontribusi,
-            lainIn: saldoSebelumnyaKas.lainIn + b.lainIn,
-            beliBola: saldoSebelumnyaKas.beliBola + b.beliBola,
-            rapat: saldoSebelumnyaKas.rapat + b.rapat,
-            insentif: saldoSebelumnyaKas.insentif + b.insentif,
-            sewaLap: saldoSebelumnyaKas.sewaLap + b.sewaLap,
-            persahabatan: saldoSebelumnyaKas.persahabatan + b.persahabatan,
-            lainOut: saldoSebelumnyaKas.lainOut + b.lainOut,
-            saldo: currentSaldo
-        };
-
-        ['s', 'k'].forEach(prefix => {
-            document.getElementById(prefix+'Iuran').innerText = formatRupiah(s.iuran);
-            document.getElementById(prefix+'JualBola').innerText = formatRupiah(s.jualBola);
-            document.getElementById(prefix+'Kontribusi').innerText = formatRupiah(s.kontribusi);
-            document.getElementById(prefix+'LainIn').innerText = formatRupiah(s.lainIn);
-            document.getElementById(prefix+'BeliBola').innerText = formatRupiah(s.beliBola);
-            document.getElementById(prefix+'Rapat').innerText = formatRupiah(s.rapat);
-            document.getElementById(prefix+'Insentif').innerText = formatRupiah(s.insentif);
-            document.getElementById(prefix+'SewaLap').innerText = formatRupiah(s.sewaLap);
-            document.getElementById(prefix+'Persahabatan').innerText = formatRupiah(s.persahabatan);
-            document.getElementById(prefix+'LainOut').innerText = formatRupiah(s.lainOut);
-            document.getElementById(prefix+'SaldoBulan').innerText = formatRupiah(s.saldo);
-        });
-
-        // Cards Summary Kas
         let totalInBulan = b.iuran + b.jualBola + b.kontribusi + b.lainIn;
         let totalOutBulan = b.beliBola + b.rapat + b.insentif + b.sewaLap + b.persahabatan + b.lainOut;
         
@@ -848,7 +689,7 @@
     function updateKetKas(index, val) {
         if (!isAdminLoggedIn) return;
         transaksiKas[index].ket = val;
-        simpanKeStorage();
+        simpanKeCloud();
     }
 
     function tambahTransaksiKas() {
@@ -871,26 +712,20 @@
             if (parts.length === 3) tgl = `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
-        transaksiKas.push({
-            id: Date.now(), tanggal: tgl, uraian: uraian, kategori: kat, nominal: nominal, isSyncIuran: false, ket: ""
-        });
-
+        transaksiKas.push({ id: Date.now(), tanggal: tgl, uraian: uraian, kategori: kat, nominal: nominal, isSyncIuran: false, ket: "" });
         document.getElementById('transUraian').value = '';
         document.getElementById('transNominal').value = '';
-        simpanKeStorage();
-        renderBukuKas();
+        simpanKeCloud();
     }
 
     function hapusKas(index) {
         if (!isAdminLoggedIn) return;
         if (confirm("Hapus transaksi kas ini?")) {
             transaksiKas.splice(index, 1);
-            simpanKeStorage();
-            renderBukuKas();
+            simpanKeCloud();
         }
     }
 
-    // --- RENDER IURAN ---
     function renderIuran() {
         const tbody = document.getElementById('iuranTableBody');
         tbody.innerHTML = '';
@@ -900,7 +735,7 @@
 
         dataAnggota.forEach((item, index) => {
             const tr = document.createElement('tr');
-            const totalBulanTerbayar = item.iuran.reduce((a, b) => a + b, 0);
+            const totalBulanTerbayar = item.iuran ? item.iuran.reduce((a, b) => a + b, 0) : 0;
             const totalBayar = totalBulanTerbayar * NOMINAL_IURAN;
             
             totalSeluruhIuran += totalBayar;
@@ -914,7 +749,7 @@
                 <td class="text-left editable-name" ${editAction}>${item.nama}</td>
             `;
 
-            item.iuran.forEach((val, bulanIdx) => {
+            (item.iuran || Array(12).fill(0)).forEach((val, bulanIdx) => {
                 const isMar = bulanIdx === 2 ? 'mar-cell' : '';
                 const checked = val === 1 ? 'checked' : '';
                 rowHtml += `
@@ -935,7 +770,6 @@
             tbody.appendChild(tr);
         });
 
-        // Update Summaries Iuran
         document.getElementById('saldoAwalDisplay').innerText = "Rp " + formatRupiah(saldoAwalIuran);
         document.getElementById('totalIuranDisplay').innerText = "Rp " + formatRupiah(totalSeluruhIuran);
         document.getElementById('totalSaldoDisplay').innerText = "Rp " + formatRupiah(runningSaldo);
@@ -947,15 +781,15 @@
 
     function toggleIuran(indexAnggota, indexBulan) {
         if (!isAdminLoggedIn) return;
+        if (!dataAnggota[indexAnggota].iuran) dataAnggota[indexAnggota].iuran = Array(12).fill(0);
         dataAnggota[indexAnggota].iuran[indexBulan] = dataAnggota[indexAnggota].iuran[indexBulan] === 1 ? 0 : 1;
-        simpanKeStorage();
-        renderIuran();
+        simpanKeCloud();
     }
 
     function updateKetIuran(index, val) {
         if (!isAdminLoggedIn) return;
         dataAnggota[index].ket = val;
-        simpanKeStorage();
+        simpanKeCloud();
     }
 
     function editNama(index) {
@@ -963,8 +797,7 @@
         const namaBaru = prompt("Ubah Nama Anggota:", dataAnggota[index].nama);
         if (namaBaru !== null && namaBaru.trim() !== "") {
             dataAnggota[index].nama = namaBaru.trim();
-            simpanKeStorage();
-            renderIuran();
+            simpanKeCloud();
         }
     }
 
@@ -972,40 +805,27 @@
         if (!isAdminLoggedIn) return;
         const inputNama = document.getElementById('namaBaru');
         const nama = inputNama.value.trim();
-        if (!nama) {
-            alert("Nama tidak boleh kosong!");
-            return;
-        }
+        if (!nama) return alert("Nama tidak boleh kosong!");
 
-        dataAnggota.push({
-            nama: nama,
-            iuran: [0,0,0,0,0,0,0,0,0,0,0,0],
-            ket: ""
-        });
-
+        dataAnggota.push({ nama: nama, iuran: [0,0,0,0,0,0,0,0,0,0,0,0], ket: "" });
         inputNama.value = "";
-        simpanKeStorage();
-        renderIuran();
+        simpanKeCloud();
     }
 
     function hapusAnggota(index) {
         if (!isAdminLoggedIn) return;
         if (confirm(`Yakin ingin menghapus ${dataAnggota[index].nama}?`)) {
             dataAnggota.splice(index, 1);
-            simpanKeStorage();
-            renderIuran();
+            simpanKeCloud();
         }
     }
 
     function updateSaldoAwal() {
         if (!isAdminLoggedIn) return;
         saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
-        simpanKeStorage();
-        renderIuran();
+        simpanKeCloud();
     }
 
-    // Inisialisasi awal
-    muatDataDariStorage();
     updateAuthUI();
 </script>
 
