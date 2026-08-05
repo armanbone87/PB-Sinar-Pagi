@@ -35,6 +35,88 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
+        /* BARIS AUTHENTICATION & LOGIN */
+        .auth-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-status {
+            margin-right: 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-login {
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+        }
+
+        /* MODAL POPUP */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 12% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-content h3 { margin-top: 0; color: var(--primary); }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        .error-msg {
+            color: var(--accent);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: none;
+        }
+
         header {
             text-align: center;
             margin-bottom: 20px;
@@ -155,8 +237,9 @@
         td.text-left { text-align: left; padding-left: 10px; }
         td.text-right { text-align: right; padding-right: 10px; }
 
-        .editable-name { cursor: pointer; font-weight: 600; }
-        .editable-name:hover { color: var(--primary); text-decoration: underline; }
+        .editable-name { font-weight: 600; }
+        .admin-mode .editable-name { cursor: pointer; }
+        .admin-mode .editable-name:hover { color: var(--primary); text-decoration: underline; }
 
         /* BUKU KAS STYLES */
         .header-pemasukan { background-color: #bae6fd; color: #0369a1; }
@@ -175,11 +258,24 @@
             border-radius: 4px;
             margin-left: 5px;
         }
+
+        /* ADMIN CONTROL VISIBILITY */
+        .admin-only { display: none !important; }
+        .admin-mode .admin-only { display: inline-flex !important; }
+        .admin-mode tr.admin-only, .admin-mode div.admin-only { display: flex !important; }
+        .admin-mode th.admin-only, .admin-mode td.admin-only { display: table-cell !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="mainContainer">
+    <!-- BARIS KONTROL LOGIN -->
+    <div class="auth-bar">
+        <span id="userStatus" class="user-status">Status: <span>Pengunjung (Read-Only)</span></span>
+        <button id="btnLogin" class="btn-login" onclick="openLoginModal()">Login Admin</button>
+        <button id="btnLogout" class="btn-logout" onclick="logoutAdmin()">Logout</button>
+    </div>
+
     <header>
         <h2>PB SINAR PAGI KABUPATEN BONE</h2>
         <h1>SISTEM KEUANGAN & BUKU KAS UMUM TAHUN 2026</h1>
@@ -213,7 +309,7 @@
         </div>
 
         <div class="controls">
-            <div class="form-inline">
+            <div class="form-inline admin-only">
                 <strong>+ Tambah Transaksi Kas:</strong>
                 <input type="date" id="transTanggal">
                 <input type="text" id="transUraian" placeholder="Uraian Transaksi" style="width: 220px;">
@@ -252,7 +348,7 @@
                         <th colspan="6" class="header-pengeluaran">PENGELUARAN (Rp)</th>
                         <th rowspan="2" class="header-saldo">SALDO (Rp)</th>
                         <th rowspan="2">KET.</th>
-                        <th rowspan="2">AKSI</th>
+                        <th rowspan="2" class="admin-only">AKSI</th>
                     </tr>
                     <tr>
                         <th class="header-pemasukan">Iuran</th>
@@ -282,7 +378,8 @@
                         <td id="bPersahabatan" class="text-right bg-pengeluaran">0</td>
                         <td id="bLainOut" class="text-right bg-pengeluaran">0</td>
                         <td id="bSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td colspan="2"></td>
+                        <td></td>
+                        <td class="admin-only"></td>
                     </tr>
                     <tr>
                         <td colspan="3" class="text-right">TOTAL TRANSAKSI S/D BULAN INI</td>
@@ -297,7 +394,8 @@
                         <td id="sPersahabatan" class="text-right bg-pengeluaran">0</td>
                         <td id="sLainOut" class="text-right bg-pengeluaran">0</td>
                         <td id="sSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td colspan="2"></td>
+                        <td></td>
+                        <td class="admin-only"></td>
                     </tr>
                     <tr style="background-color: #e2e8f0;">
                         <td colspan="3" class="text-right">TOTAL TRANSAKSI KOMULATIF</td>
@@ -312,7 +410,8 @@
                         <td id="kPersahabatan" class="text-right bg-pengeluaran">0</td>
                         <td id="kLainOut" class="text-right bg-pengeluaran">0</td>
                         <td id="kSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td colspan="2"></td>
+                        <td></td>
+                        <td class="admin-only"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -337,14 +436,14 @@
         </div>
 
         <div class="controls">
-            <div class="form-inline">
+            <div class="form-inline admin-only">
                 <strong>+ Tambah Anggota:</strong>
                 <input type="text" id="namaBaru" placeholder="Nama Anggota Baru...">
                 <button onclick="tambahAnggota()">+ Tambah</button>
             </div>
             <div class="form-inline">
                 <label><b>Saldo Awal Des 2025: </b></label>
-                <input type="number" id="inputSaldoAwal" value="400000" style="width: 110px;" onchange="updateSaldoAwal()">
+                <input type="number" id="inputSaldoAwal" value="400000" style="width: 110px;" onchange="updateSaldoAwal()" disabled>
             </div>
         </div>
 
@@ -358,7 +457,7 @@
                         <th rowspan="2">TOTAL</th>
                         <th rowspan="2" class="header-saldo">SALDO AKUMULASI</th>
                         <th rowspan="2">KET</th>
-                        <th rowspan="2">AKSI</th>
+                        <th rowspan="2" class="admin-only">AKSI</th>
                     </tr>
                     <tr>
                         <th>Jan</th><th>Feb</th><th class="mar-header">Mar</th><th>Apr</th><th>Mei</th><th>Jun</th>
@@ -371,7 +470,8 @@
                         <td colspan="14" class="text-right">TOTAL IURAN TERKUMPUL</td>
                         <td id="grandTotalIuran" class="text-right">Rp 0</td>
                         <td id="finalSaldoIuran" class="text-right bg-saldo">Rp 0</td>
-                        <td colspan="2"></td>
+                        <td></td>
+                        <td class="admin-only"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -379,9 +479,28 @@
     </div>
 </div>
 
+<!-- MODAL POPUP LOGIN -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+        <h3>Login Admin</h3>
+        <div id="errorMsg" class="error-msg">Username atau password salah!</div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Masukkan password">
+        </div>
+        <button style="width: 100%;" onclick="prosesLogin()">Login</button>
+    </div>
+</div>
+
 <script>
     const NOMINAL_IURAN = 10000;
     let saldoAwalIuran = 400000;
+    let isAdminLoggedIn = false;
 
     // Saldo Akumulasi Bulan Sebelumnya (Buku Kas Umum)
     const saldoSebelumnyaKas = {
@@ -390,7 +509,7 @@
         persahabatan: 9263000, lainOut: 4782500, saldo: 550000
     };
 
-    // Data Transaksi Kas (Sesuai Gambar 2)
+    // Data Transaksi Kas
     let transaksiKas = [
         { id: 1, tanggal: "1-5 Ags 2026", uraian: "Terima Iuran", kategori: "in_iuran", nominal: 180000, isSyncIuran: true, ket: "" },
         { id: 2, tanggal: "31/07/2026", uraian: "Beli Bola 10 Slop", kategori: "out_beliBola", nominal: 1550000, isSyncIuran: false, ket: "" },
@@ -398,7 +517,7 @@
         { id: 4, tanggal: "05/08/2026", uraian: "Pembayaran Sewa Lapangan & Insentif", kategori: "multi", multiDetail: { out_insentif: 600000, out_sewaLap: 700000 }, nominal: 1300000, isSyncIuran: false, ket: "" }
     ];
 
-    // Data Iuran 55 Anggota (Sesuai Gambar 1)
+    // Data Iuran 55 Anggota
     let dataAnggota = [
         { nama: "Ust IRWAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "Maret puasa" },
         { nama: "BAHAR", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
@@ -454,8 +573,64 @@
         { nama: "ANTO B", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
         { nama: "ZULFIQAR", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
         { nama: "IRHAM", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
-        { nama: "IBNU", iuran: [0,0,0,0,0,0,1,0,0,0,0,0], ket: "" }
+        { nama: "IBNU", iuran: [0,0,0,0,0,0,1,0,0,0,0,0] }
     ];
+
+    /* SYSTEM AUTENTIKASI */
+    function openLoginModal() {
+        document.getElementById('loginModal').style.display = 'block';
+    }
+
+    function closeLoginModal() {
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function prosesLogin() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+
+        if (u === 'admin' && p === 'Admin@2026') {
+            isAdminLoggedIn = true;
+            closeLoginModal();
+            updateAuthUI();
+            alert('Login Admin Berhasil!');
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+        }
+    }
+
+    function logoutAdmin() {
+        isAdminLoggedIn = false;
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        updateAuthUI();
+        alert('Anda telah logout. Kembali ke mode Pengunjung.');
+    }
+
+    function updateAuthUI() {
+        const container = document.getElementById('mainContainer');
+        const userStatus = document.getElementById('userStatus');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnLogout = document.getElementById('btnLogout');
+        const inputSaldo = document.getElementById('inputSaldoAwal');
+
+        if (isAdminLoggedIn) {
+            container.classList.add('admin-mode');
+            userStatus.innerHTML = 'Status: <span style="color: var(--primary);">Admin (Full Access)</span>';
+            btnLogin.style.display = 'none';
+            btnLogout.style.display = 'inline-block';
+            inputSaldo.removeAttribute('disabled');
+        } else {
+            container.classList.remove('admin-mode');
+            userStatus.innerHTML = 'Status: <span>Pengunjung (Read-Only)</span>';
+            btnLogin.style.display = 'inline-block';
+            btnLogout.style.display = 'none';
+            inputSaldo.setAttribute('disabled', 'true');
+        }
+
+        renderIuran();
+    }
 
     function formatRupiah(num) {
         if (!num || num === 0) return "-";
@@ -472,13 +647,11 @@
 
     // --- SINKRONISASI IURAN KE BUKU KAS ---
     function syncIuranToKas() {
-        // Hitung total iuran bulan Agustus (Index 7) dari daftar iuran
         let totalIuranAgustus = 0;
         dataAnggota.forEach(m => {
             if (m.iuran[7] === 1) totalIuranAgustus += NOMINAL_IURAN;
         });
 
-        // Update nilai transaksi "Terima Iuran" pada Kas
         let iuranTrans = transaksiKas.find(t => t.isSyncIuran);
         if (iuranTrans) {
             iuranTrans.nominal = totalIuranAgustus;
@@ -491,7 +664,6 @@
         const tbody = document.getElementById('kasTableBody');
         tbody.innerHTML = '';
 
-        // Row Saldo Bulan Sebelumnya
         tbody.innerHTML += `
             <tr style="font-style: italic; background-color: #f8fafc;">
                 <td></td><td>30/07/2026</td>
@@ -507,7 +679,8 @@
                 <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.persahabatan)}</td>
                 <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.lainOut)}</td>
                 <td class="text-right bg-saldo">${formatRupiah(saldoSebelumnyaKas.saldo)}</td>
-                <td colspan="2"></td>
+                <td></td>
+                <td class="admin-only"></td>
             </tr>
         `;
 
@@ -537,6 +710,8 @@
                 currentSaldo -= t.nominal;
             }
 
+            let disabledInput = isAdminLoggedIn ? '' : 'disabled';
+
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${index + 1}</td>
@@ -553,8 +728,8 @@
                 <td class="text-right bg-pengeluaran">${formatRupiah(pOut.persahabatan)}</td>
                 <td class="text-right bg-pengeluaran">${formatRupiah(pOut.lainOut)}</td>
                 <td class="text-right bg-saldo">${formatRupiah(currentSaldo)}</td>
-                <td><input type="text" value="${t.ket || ''}" style="width:70px; font-size:0.75rem;" onchange="transaksiKas[${index}].ket=this.value"></td>
-                <td>${t.isSyncIuran ? '-' : `<button class="btn-danger" onclick="hapusKas(${index})">Hapus</button>`}</td>
+                <td><input type="text" value="${t.ket || ''}" style="width:70px; font-size:0.75rem;" ${disabledInput} onchange="transaksiKas[${index}].ket=this.value"></td>
+                <td class="admin-only">${t.isSyncIuran ? '-' : `<button class="btn-danger" onclick="hapusKas(${index})">Hapus</button>`}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -611,6 +786,7 @@
     }
 
     function tambahTransaksiKas() {
+        if (!isAdminLoggedIn) return;
         let tgl = document.getElementById('transTanggal').value;
         let uraian = document.getElementById('transUraian').value.trim();
         let kat = document.getElementById('transKategori').value;
@@ -639,6 +815,7 @@
     }
 
     function hapusKas(index) {
+        if (!isAdminLoggedIn) return;
         if (confirm("Hapus transaksi kas ini?")) {
             transaksiKas.splice(index, 1);
             renderBukuKas();
@@ -661,9 +838,12 @@
             totalSeluruhIuran += totalBayar;
             runningSaldo += totalBayar;
 
+            let disabledAttr = isAdminLoggedIn ? '' : 'disabled';
+            let editAction = isAdminLoggedIn ? `onclick="editNama(${index})"` : '';
+
             let rowHtml = `
                 <td>${index + 1}</td>
-                <td class="text-left editable-name" onclick="editNama(${index})">${item.nama}</td>
+                <td class="text-left editable-name" ${editAction}>${item.nama}</td>
             `;
 
             item.iuran.forEach((val, bulanIdx) => {
@@ -671,7 +851,7 @@
                 const checked = val === 1 ? 'checked' : '';
                 rowHtml += `
                     <td class="${isMar}">
-                        <input type="checkbox" class="checkbox-iuran" ${checked} onchange="toggleIuran(${index}, ${bulanIdx})">
+                        <input type="checkbox" class="checkbox-iuran" ${checked} ${disabledAttr} onchange="toggleIuran(${index}, ${bulanIdx})">
                     </td>
                 `;
             });
@@ -679,8 +859,8 @@
             rowHtml += `
                 <td class="text-right">${formatRupiah(totalBayar)}</td>
                 <td class="text-right bg-saldo">${formatRupiah(runningSaldo)}</td>
-                <td><input type="text" value="${item.ket || ''}" style="width: 80px; font-size:0.75rem;" onchange="dataAnggota[${index}].ket=this.value"></td>
-                <td><button class="btn-danger" onclick="hapusAnggota(${index})">Hapus</button></td>
+                <td><input type="text" value="${item.ket || ''}" style="width: 80px; font-size:0.75rem;" ${disabledAttr} onchange="dataAnggota[${index}].ket=this.value"></td>
+                <td class="admin-only"><button class="btn-danger" onclick="hapusAnggota(${index})">Hapus</button></td>
             `;
 
             tr.innerHTML = rowHtml;
@@ -694,16 +874,17 @@
         document.getElementById('grandTotalIuran').innerText = "Rp " + formatRupiah(totalSeluruhIuran);
         document.getElementById('finalSaldoIuran').innerText = "Rp " + formatRupiah(runningSaldo);
 
-        // Setiap iuran berubah -> Otomatis render & update Buku Kas Umum
         renderBukuKas();
     }
 
     function toggleIuran(indexAnggota, indexBulan) {
+        if (!isAdminLoggedIn) return;
         dataAnggota[indexAnggota].iuran[indexBulan] = dataAnggota[indexAnggota].iuran[indexBulan] === 1 ? 0 : 1;
         renderIuran();
     }
 
     function editNama(index) {
+        if (!isAdminLoggedIn) return;
         const namaBaru = prompt("Ubah Nama Anggota:", dataAnggota[index].nama);
         if (namaBaru !== null && namaBaru.trim() !== "") {
             dataAnggota[index].nama = namaBaru.trim();
@@ -712,6 +893,7 @@
     }
 
     function tambahAnggota() {
+        if (!isAdminLoggedIn) return;
         const inputNama = document.getElementById('namaBaru');
         const nama = inputNama.value.trim();
         if (!nama) {
@@ -730,6 +912,7 @@
     }
 
     function hapusAnggota(index) {
+        if (!isAdminLoggedIn) return;
         if (confirm(`Yakin ingin menghapus ${dataAnggota[index].nama}?`)) {
             dataAnggota.splice(index, 1);
             renderIuran();
@@ -737,12 +920,13 @@
     }
 
     function updateSaldoAwal() {
+        if (!isAdminLoggedIn) return;
         saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
         renderIuran();
     }
 
-    // Inisialisasi
-    renderIuran();
+    // Inisialisasi awal
+    updateAuthUI();
 </script>
 
 </body>
