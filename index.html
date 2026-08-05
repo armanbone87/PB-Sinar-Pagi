@@ -268,7 +268,7 @@
 <div class="container" id="mainContainer">
     <div class="auth-bar">
         <span id="userStatus" class="user-status">Status: <span>Pengunjung (Read-Only)</span></span>
-        <span id="dbStatus" class="db-status">🟡 Menghubungkan Cloud...</span>
+        <span id="dbStatus" class="db-status">⚡ Menghubungkan Cloud...</span>
         <button id="btnLogin" class="btn-login" onclick="openLoginModal()">Login Admin</button>
         <button id="btnLogout" class="btn-logout" onclick="logoutAdmin()">Logout</button>
     </div>
@@ -280,7 +280,7 @@
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('kas', event)">📖 BUKU KAS UMUM</button>
-        <button class="tab-btn" onclick="openTab('iuran', event)">🏸 DAFTAR IURAN ANGGOTA</button>
+        <button class="tab-btn" onclick="openTab('iuran', event)">📋 DAFTAR IURAN ANGGOTA</button>
     </div>
 
     <!-- TAB 1: BUKU KAS UMUM -->
@@ -463,16 +463,15 @@
 
 <script>
     // --- KONFIGURASI FIREBASE ---
-    // Ganti dengan kredensial dari Firebase Console Anda!
     const firebaseConfig = {
-    apiKey: "AIzaSyCMjG9thg1hLv7fjZjvRvPicg4rDyWPCaE",
-    authDomain: "pb-sinar-pagi.firebaseapp.com",
-    databaseURL: "https://pb-sinar-pagi-default-rtdb.firebaseio.com",
-    projectId: "pb-sinar-pagi",
-    storageBucket: "pb-sinar-pagi.firebasestorage.app",
-    messagingSenderId: "980167000610",
-    appId: "1:980167000610:web:8bb4150ce7000d4ee8407b"
-  };
+        apiKey: "AIzaSyCMjG9thg1hLv7fjZjvRvPicg4rDyWPCaE",
+        authDomain: "pb-sinar-pagi.firebaseapp.com",
+        databaseURL: "https://pb-sinar-pagi-default-rtdb.firebaseio.com",
+        projectId: "pb-sinar-pagi",
+        storageBucket: "pb-sinar-pagi.firebasestorage.app",
+        messagingSenderId: "980167000610",
+        appId: "1:980167000610:web:8bb4150ce7000d4ee8407b"
+    };
 
     // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
@@ -489,7 +488,65 @@
     };
 
     let transaksiKas = [];
-    let dataAnggota = [];
+
+    // --- DATA ANGGOTA DENGAN STATUS IURAN LENGKAP BONE 2026 ---
+    let dataAnggota = [
+        { nama: "Ust IRWAN", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "Maret puasa" },
+        { nama: "BAHAR", iuran: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "KADRI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "A.EDI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "IBRAHIM", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
+        { nama: "AWI", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "HARMAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "CINO", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "HENGKI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.RUSDI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0], ket: "" },
+        { nama: "SYAM", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "IMRAN", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "INDRA", iuran: [1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "P.YUS", iuran: [1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "ANTO Dispenda", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "MASDAR", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
+        { nama: "DhausJie", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.ICCANG", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "RIVAL", iuran: [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "H.SUNDU", iuran: [0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "A.ROBY", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.FAHRI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "SABRI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "YUDHI", iuran: [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.TAHAR", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "AAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "JUMAING", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "YesSAFRI", iuran: [1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.KARMAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "PABO", iuran: [0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "YONO", iuran: [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "KEVIN", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "AGUS.M", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "AGUS ASKARI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "MARDI", iuran: [0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "SOEHA", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "HENRIK", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "ALI", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "MASKITIN", iuran: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "HAERUL", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "H.ABUSTAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], ket: "" },
+        { nama: "ARDIAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "A.KOMAR", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
+        { nama: "A.ALFIAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "FIRDAUS Sijelling", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], ket: "" },
+        { nama: "BENTO", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "SAMIR", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "MUHSIN", iuran: [0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "A.ACO", iuran: [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "WIRA", iuran: [1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "RUSLI", iuran: [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], ket: "" },
+        { nama: "ANTO B", iuran: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "ZULFIQAR", iuran: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], ket: "" },
+        { nama: "IRHAM", iuran: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], ket: "" },
+        { nama: "IBNU", iuran: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], ket: "" }
+    ];
 
     // --- MENGHUBUNGKAN KE CLOUD REALTIME DATABASE ---
     db.ref('keuangan').on('value', (snapshot) => {
@@ -500,16 +557,28 @@
 
         if (data) {
             transaksiKas = data.transaksiKas || [];
-            dataAnggota = data.dataAnggota || [];
+            dataAnggota = data.dataAnggota || dataAnggota;
             saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
             document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
-            renderIuran();
+        } else {
+            // Jika database masih kosong di cloud, simpan data awal ini ke cloud
+            simpanKeCloudInit();
         }
+        renderIuran();
     }, (error) => {
         document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
         document.getElementById('dbStatus').style.background = '#fee2e2';
         document.getElementById('dbStatus').style.color = '#b91c1c';
+        renderIuran();
     });
+
+    function simpanKeCloudInit() {
+        db.ref('keuangan').set({
+            transaksiKas: transaksiKas,
+            dataAnggota: dataAnggota,
+            saldoAwal: saldoAwalIuran
+        });
+    }
 
     function simpanKeCloud() {
         if (!isAdminLoggedIn) return;
