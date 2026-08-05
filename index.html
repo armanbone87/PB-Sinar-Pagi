@@ -43,10 +43,11 @@
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border);
+            gap: 10px;
         }
 
         .user-status {
-            margin-right: 15px;
+            margin-right: auto;
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -70,6 +71,26 @@
             cursor: pointer;
             font-weight: 600;
             display: none;
+        }
+
+        .btn-save-all {
+            background-color: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-reset {
+            background-color: #64748b;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         /* MODAL POPUP */
@@ -272,6 +293,8 @@
     <!-- BARIS KONTROL LOGIN -->
     <div class="auth-bar">
         <span id="userStatus" class="user-status">Status: <span>Pengunjung (Read-Only)</span></span>
+        <button id="btnSaveData" class="btn-save-all admin-only" onclick="simpanKeStorage(true)">💾 Simpan Data</button>
+        <button id="btnResetData" class="btn-reset admin-only" onclick="resetDataBawaan()">🔄 Reset Default</button>
         <button id="btnLogin" class="btn-login" onclick="openLoginModal()">Login Admin</button>
         <button id="btnLogout" class="btn-logout" onclick="logoutAdmin()">Logout</button>
     </div>
@@ -509,16 +532,15 @@
         persahabatan: 9263000, lainOut: 4782500, saldo: 550000
     };
 
-    // Data Transaksi Kas
-    let transaksiKas = [
+    // Data Bawaan (Default)
+    const defaultTransaksiKas = [
         { id: 1, tanggal: "1-5 Ags 2026", uraian: "Terima Iuran", kategori: "in_iuran", nominal: 180000, isSyncIuran: true, ket: "" },
         { id: 2, tanggal: "31/07/2026", uraian: "Beli Bola 10 Slop", kategori: "out_beliBola", nominal: 1550000, isSyncIuran: false, ket: "" },
         { id: 3, tanggal: "05/08/2026", uraian: "Terima Uang Penjualan Bola 10 Slop", kategori: "in_jualBola", nominal: 2400000, isSyncIuran: false, ket: "" },
         { id: 4, tanggal: "05/08/2026", uraian: "Pembayaran Sewa Lapangan & Insentif", kategori: "multi", multiDetail: { out_insentif: 600000, out_sewaLap: 700000 }, nominal: 1300000, isSyncIuran: false, ket: "" }
     ];
 
-    // Data Iuran 55 Anggota
-    let dataAnggota = [
+    const defaultDataAnggota = [
         { nama: "Ust IRWAN", iuran: [1,1,0,1,1,1,1,0,0,0,0,0], ket: "Maret puasa" },
         { nama: "BAHAR", iuran: [0,0,0,1,1,1,1,0,0,0,0,0], ket: "" },
         { nama: "KADRI", iuran: [1,1,0,1,1,1,1,1,0,0,0,0], ket: "" },
@@ -575,6 +597,44 @@
         { nama: "IRHAM", iuran: [0,0,0,0,0,1,1,0,0,0,0,0], ket: "" },
         { nama: "IBNU", iuran: [0,0,0,0,0,0,1,0,0,0,0,0] }
     ];
+
+    let transaksiKas = [];
+    let dataAnggota = [];
+
+    // --- FUNGSI PERSISTENSI STORAGE ---
+    function muatDataDariStorage() {
+        const savedKas = localStorage.getItem('pb_sinar_pagi_transaksiKas');
+        const savedIuran = localStorage.getItem('pb_sinar_pagi_dataAnggota');
+        const savedSaldoAwal = localStorage.getItem('pb_sinar_pagi_saldoAwal');
+
+        transaksiKas = savedKas ? JSON.parse(savedKas) : JSON.parse(JSON.stringify(defaultTransaksiKas));
+        dataAnggota = savedIuran ? JSON.parse(savedIuran) : JSON.parse(JSON.stringify(defaultDataAnggota));
+        saldoAwalIuran = savedSaldoAwal ? parseInt(savedSaldoAwal) : 400000;
+
+        document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
+    }
+
+    function simpanKeStorage(showAlert = false) {
+        localStorage.setItem('pb_sinar_pagi_transaksiKas', JSON.stringify(transaksiKas));
+        localStorage.setItem('pb_sinar_pagi_dataAnggota', JSON.stringify(dataAnggota));
+        localStorage.setItem('pb_sinar_pagi_saldoAwal', saldoAwalIuran);
+        
+        if (showAlert) {
+            alert('Semua perubahan data iuran & transaksi berhasil disimpan ke memori!');
+        }
+    }
+
+    function resetDataBawaan() {
+        if (!isAdminLoggedIn) return;
+        if (confirm("Apakah Anda yakin ingin mengembalikan data ke pengaturan awal (Default)? Semua update terbaru akan diganti.")) {
+            localStorage.removeItem('pb_sinar_pagi_transaksiKas');
+            localStorage.removeItem('pb_sinar_pagi_dataAnggota');
+            localStorage.removeItem('pb_sinar_pagi_saldoAwal');
+            muatDataDariStorage();
+            renderIuran();
+            alert('Data telah dikembalikan ke kondisi default!');
+        }
+    }
 
     /* SYSTEM AUTENTIKASI */
     function openLoginModal() {
@@ -728,7 +788,7 @@
                 <td class="text-right bg-pengeluaran">${formatRupiah(pOut.persahabatan)}</td>
                 <td class="text-right bg-pengeluaran">${formatRupiah(pOut.lainOut)}</td>
                 <td class="text-right bg-saldo">${formatRupiah(currentSaldo)}</td>
-                <td><input type="text" value="${t.ket || ''}" style="width:70px; font-size:0.75rem;" ${disabledInput} onchange="transaksiKas[${index}].ket=this.value"></td>
+                <td><input type="text" value="${t.ket || ''}" style="width:70px; font-size:0.75rem;" ${disabledInput} onchange="updateKetKas(${index}, this.value)"></td>
                 <td class="admin-only">${t.isSyncIuran ? '-' : `<button class="btn-danger" onclick="hapusKas(${index})">Hapus</button>`}</td>
             `;
             tbody.appendChild(tr);
@@ -785,6 +845,12 @@
         document.getElementById('kasSaldoAkhir').innerText = "Rp " + formatRupiah(currentSaldo);
     }
 
+    function updateKetKas(index, val) {
+        if (!isAdminLoggedIn) return;
+        transaksiKas[index].ket = val;
+        simpanKeStorage();
+    }
+
     function tambahTransaksiKas() {
         if (!isAdminLoggedIn) return;
         let tgl = document.getElementById('transTanggal').value;
@@ -811,6 +877,7 @@
 
         document.getElementById('transUraian').value = '';
         document.getElementById('transNominal').value = '';
+        simpanKeStorage();
         renderBukuKas();
     }
 
@@ -818,6 +885,7 @@
         if (!isAdminLoggedIn) return;
         if (confirm("Hapus transaksi kas ini?")) {
             transaksiKas.splice(index, 1);
+            simpanKeStorage();
             renderBukuKas();
         }
     }
@@ -859,7 +927,7 @@
             rowHtml += `
                 <td class="text-right">${formatRupiah(totalBayar)}</td>
                 <td class="text-right bg-saldo">${formatRupiah(runningSaldo)}</td>
-                <td><input type="text" value="${item.ket || ''}" style="width: 80px; font-size:0.75rem;" ${disabledAttr} onchange="dataAnggota[${index}].ket=this.value"></td>
+                <td><input type="text" value="${item.ket || ''}" style="width: 80px; font-size:0.75rem;" ${disabledAttr} onchange="updateKetIuran(${index}, this.value)"></td>
                 <td class="admin-only"><button class="btn-danger" onclick="hapusAnggota(${index})">Hapus</button></td>
             `;
 
@@ -880,7 +948,14 @@
     function toggleIuran(indexAnggota, indexBulan) {
         if (!isAdminLoggedIn) return;
         dataAnggota[indexAnggota].iuran[indexBulan] = dataAnggota[indexAnggota].iuran[indexBulan] === 1 ? 0 : 1;
+        simpanKeStorage();
         renderIuran();
+    }
+
+    function updateKetIuran(index, val) {
+        if (!isAdminLoggedIn) return;
+        dataAnggota[index].ket = val;
+        simpanKeStorage();
     }
 
     function editNama(index) {
@@ -888,6 +963,7 @@
         const namaBaru = prompt("Ubah Nama Anggota:", dataAnggota[index].nama);
         if (namaBaru !== null && namaBaru.trim() !== "") {
             dataAnggota[index].nama = namaBaru.trim();
+            simpanKeStorage();
             renderIuran();
         }
     }
@@ -908,6 +984,7 @@
         });
 
         inputNama.value = "";
+        simpanKeStorage();
         renderIuran();
     }
 
@@ -915,6 +992,7 @@
         if (!isAdminLoggedIn) return;
         if (confirm(`Yakin ingin menghapus ${dataAnggota[index].nama}?`)) {
             dataAnggota.splice(index, 1);
+            simpanKeStorage();
             renderIuran();
         }
     }
@@ -922,10 +1000,12 @@
     function updateSaldoAwal() {
         if (!isAdminLoggedIn) return;
         saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
+        simpanKeStorage();
         renderIuran();
     }
 
     // Inisialisasi awal
+    muatDataDariStorage();
     updateAuthUI();
 </script>
 
