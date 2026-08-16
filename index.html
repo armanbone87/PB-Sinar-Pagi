@@ -429,34 +429,21 @@
     }
 
     function muatDataBulan() {
-        db.ref('keuangan/' + bulanAktif).on('value', (snapshot) => {
+        // Tarik data langsung dari root 'keuangan' agar data transaksi Anda langsung muncul secara sinkron
+        db.ref('keuangan').on('value', (snapshot) => {
             const data = snapshot.val();
             document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
             document.getElementById('dbStatus').style.background = '#dcfce7';
             document.getElementById('dbStatus').style.color = '#15803d';
 
-            if (data && (data.transaksiKas || data.dataAnggota)) {
+            if (data) {
                 transaksiKas = data.transaksiKas || [];
                 dataAnggota = data.dataAnggota || dataAnggota;
                 saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
                 if (data.saldoSebelumnyaKas) saldoSebelumnyaKas = data.saldoSebelumnyaKas;
                 document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
-                renderIuran();
-            } else {
-                // Fallback otomatis ke root 'keuangan' agar data lama Anda langsung muncul
-                db.ref('keuangan').once('value', (rootSnap) => {
-                    const rootData = rootSnap.val();
-                    if (rootData && bulanAktif === "2026-08") {
-                        transaksiKas = rootData.transaksiKas || [];
-                        dataAnggota = rootData.dataAnggota || dataAnggota;
-                        saldoAwalIuran = rootData.saldoAwal !== undefined ? rootData.saldoAwal : 400000;
-                        if (rootData.saldoSebelumnyaKas) saldoSebelumnyaKas = rootData.saldoSebelumnyaKas;
-                    } else {
-                        transaksiKas = [];
-                    }
-                    renderIuran();
-                });
             }
+            renderIuran();
         }, (error) => {
             document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
             document.getElementById('dbStatus').style.background = '#fee2e2';
@@ -467,20 +454,12 @@
 
     function simpanKeCloud() {
         if (!isAdminLoggedIn) return;
-        db.ref('keuangan/' + bulanAktif).set({
+        db.ref('keuangan').set({
             transaksiKas: transaksiKas,
             dataAnggota: dataAnggota,
             saldoAwal: saldoAwalIuran,
             saldoSebelumnyaKas: saldoSebelumnyaKas
         });
-        if (bulanAktif === "2026-08") {
-            db.ref('keuangan').set({
-                transaksiKas: transaksiKas,
-                dataAnggota: dataAnggota,
-                saldoAwal: saldoAwalIuran,
-                saldoSebelumnyaKas: saldoSebelumnyaKas
-            });
-        }
     }
 
     function openLoginModal() { document.getElementById('loginModal').style.display = 'block'; }
@@ -801,7 +780,6 @@
         simpanKeCloud();
     }
 
-    // Inisialisasi awal saat halaman dibuka
     muatDataBulan();
     updateAuthUI();
 </script>
