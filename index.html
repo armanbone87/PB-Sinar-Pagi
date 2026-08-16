@@ -62,7 +62,7 @@
             font-weight: bold;
         }
 
-        .btn-login, .btn-logout, .btn-save-all, .btn-reset {
+        .btn-login, .btn-logout {
             color: white;
             padding: 8px 16px;
             border: none;
@@ -214,8 +214,8 @@
 
         button:hover { opacity: 0.9; }
         .btn-success { background-color: #10b981; }
-        .btn-danger { background-color: var(--accent); padding: 4px 8px; font-size: 0.8rem; }
-        .btn-edit { background-color: #3b82f6; padding: 4px 8px; font-size: 0.8rem; margin-right: 4px; }
+        .btn-danger { background-color: var(--accent); padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; }
+        .btn-edit { background-color: #3b82f6; padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; margin-right: 2px; }
 
         .table-responsive {
             overflow-x: auto;
@@ -774,7 +774,7 @@
 
         if (!tgl) {
             let today = new Date();
-            tgl = today.getDate() + '/' + (today.getMonth()+1) + '/' + today.getFullYear();
+            tgl = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth()+1).padStart(2, '0') + '/' + today.getFullYear();
         } else {
             let parts = tgl.split('-');
             if (parts.length === 3) tgl = `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -796,7 +796,6 @@
             transaksiKas[index].uraian = newUraian.trim();
             transaksiKas[index].nominal = parseInt(newNominal) || 0;
             simpanKeCloud();
-            renderIuran();
         }
     }
 
