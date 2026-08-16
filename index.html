@@ -3,857 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Keuangan PB SINAR PAGI KABUPATEN BONE 2026</title>
-    <!-- Firebase SDK (v9 Compatibility) -->
+    <title>PB SINAR PAGI | Sistem Keuangan Profesional</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #1e3a8a;
-            --accent: #ef4444;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #cbd5e1;
-            --pemasukan-header: #0284c7;
-            --pengeluaran-header: #16a34a;
-            --saldo-header: #9333ea;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: #1e293b;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: var(--card);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .auth-bar {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            gap: 10px;
-        }
-
-        .user-status {
-            margin-right: auto;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .db-status {
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: #e2e8f0;
-            font-weight: bold;
-        }
-
-        .btn-login, .btn-logout, .btn-save-all, .btn-reset {
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-login { background-color: var(--primary); }
-        .btn-logout { background-color: var(--accent); display: none; }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 12% auto;
-            padding: 25px;
-            border-radius: 10px;
-            width: 320px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .modal-content h3 { margin-top: 0; color: var(--primary); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600; }
-        .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
-
-        .close-btn {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
-            color: #64748b;
-        }
-
-        .error-msg {
-            color: var(--accent);
-            font-size: 0.8rem;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid var(--primary);
-            padding-bottom: 15px;
-        }
-
-        h1 { margin: 5px 0; color: var(--primary); font-size: 1.8rem; text-transform: uppercase; }
-        h2 { margin: 0; color: #475569; font-size: 1.2rem; font-weight: 600; }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            background: #e2e8f0;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: bold;
-            color: #475569;
-            cursor: pointer;
-            border-radius: 8px 8px 0 0;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid var(--primary);
-        }
-
-        .card.pemasukan { border-left-color: var(--pemasukan-header); background: #f0f9ff; }
-        .card.pengeluaran { border-left-color: var(--pengeluaran-header); background: #f0fdf4; }
-        .card.saldo { border-left-color: var(--saldo-header); background: #faf5ff; }
-
-        .card-title { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: bold; }
-        .card-value { font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-        input[type="text"], input[type="number"], input[type="date"], select {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            outline: none;
-            font-size: 0.9rem;
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-
-        button:hover { opacity: 0.9; }
-        .btn-success { background-color: #10b981; }
-        .btn-danger { background-color: var(--accent); padding: 4px 8px; font-size: 0.75rem; }
-        .btn-edit { background-color: #3b82f6; padding: 4px 8px; font-size: 0.75rem; margin-right: 4px; }
-
-        .table-responsive {
-            overflow-x: auto;
-            max-height: 600px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-        }
-
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center; background: white; }
-        th, td { border: 1px solid var(--border); padding: 8px 6px; white-space: nowrap; }
-        thead { position: sticky; top: 0; background-color: #f1f5f9; z-index: 10; }
-
-        th.mar-header, td.mar-cell { background-color: #fee2e2; color: #991b1b; }
-        .checkbox-iuran { cursor: pointer; width: 17px; height: 17px; }
-
-        td.text-left { text-align: left; padding-left: 10px; }
-        td.text-right { text-align: right; padding-right: 10px; }
-
-        .editable-name { font-weight: 600; }
-        .admin-mode .editable-name { cursor: pointer; }
-        .admin-mode .editable-name:hover { color: var(--primary); text-decoration: underline; }
-
-        .header-pemasukan { background-color: #bae6fd; color: #0369a1; }
-        .header-pengeluaran { background-color: #bbf7d0; color: #15803d; }
-        .header-saldo { background-color: #e9d5ff; color: #6b21a8; }
-
-        .bg-pemasukan { background-color: #f0f9ff; }
-        .bg-pengeluaran { background-color: #f0fdf4; }
-        .bg-saldo { background-color: #faf5ff; font-weight: bold; }
-
-        .sync-badge {
-            background: #8b5cf6;
-            color: white;
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
+        :root { --primary: #1e3a8a; --bg: #f8fafc; --text: #1e293b; --accent: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .auth-bar { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; gap: 10px; }
+        
+        /* Dashboard Ringkasan */
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { padding: 20px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .card-val { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-top: 5px; }
+        
+        /* Tabel */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f1f5f9; padding: 14px; border: 1px solid #e2e8f0; font-size: 0.75rem; text-transform: uppercase; color: #475569; }
+        td { padding: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        tr:nth-child(even) { background: #fcfcfc; }
+        tr:hover { background: #f1f5f9; }
+        
+        /* Fitur Aksi */
         .admin-only { display: none !important; }
-        .admin-mode .admin-only { display: inline-flex !important; }
-        .admin-mode tr.admin-only, .admin-mode div.admin-only { display: flex !important; }
-        .admin-mode th.admin-only, .admin-mode td.admin-only { display: table-cell !important; }
+        .admin-mode .admin-only { display: table-cell !important; }
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; margin: 2px; }
+        .edit { background: #dbeafe; color: #1e40af; }
+        .hapus { background: #fee2e2; color: #b91c1c; }
+        .bg-saldo { font-weight: 700; color: #5b21b6; background: #f5f3ff; }
     </style>
 </head>
 <body>
 
 <div class="container" id="mainContainer">
     <div class="auth-bar">
-        <span id="userStatus" class="user-status">Status: <span>Pengunjung (Read-Only)</span></span>
-        <span id="dbStatus" class="db-status">⚡ Menghubungkan Cloud...</span>
-        <button id="btnLogin" class="btn-login" onclick="openLoginModal()">Login Admin</button>
-        <button id="btnLogout" class="btn-logout" onclick="logoutAdmin()">Logout</button>
+        <span id="userStatus" style="margin-right:auto; font-weight:600;">Status: Pengunjung</span>
+        <button id="btnLogin" onclick="prosesLogin()">Login Admin</button>
+        <button id="btnLogout" style="display:none" onclick="logoutAdmin()">Logout</button>
     </div>
 
-    <header>
-        <h2>PB SINAR PAGI KABUPATEN BONE</h2>
-        <h1>SISTEM KEUANGAN & BUKU KAS UMUM TAHUN 2026</h1>
+    <header style="text-align:center; margin-bottom:30px;">
+        <h1>PB SINAR PAGI KABUPATEN BONE</h1>
+        <p>Sistem Keuangan & Buku Kas Umum 2026</p>
     </header>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openTab('kas', event)">📖 BUKU KAS UMUM</button>
-        <button class="tab-btn" onclick="openTab('iuran', event)">📋 DAFTAR IURAN ANGGOTA</button>
+    <div class="summary-cards">
+        <div class="card"><div>Saldo Lalu</div><div class="card-val" id="valLalu">Rp 550.000</div></div>
+        <div class="card"><div>Total Pemasukan</div><div class="card-val" id="valMasuk">Rp 0</div></div>
+        <div class="card"><div>Total Pengeluaran</div><div class="card-val" id="valKeluar">Rp 0</div></div>
+        <div class="card"><div>Saldo Akhir</div><div class="card-val" id="valSaldo">Rp 0</div></div>
     </div>
 
-    <!-- TAB 1: BUKU KAS UMUM -->
-    <div id="kas" class="tab-content active">
-        <div class="summary-cards">
-            <div class="card">
-                <div class="card-title">Saldo Lalu (30/07/2026)</div>
-                <div class="card-value">Rp 550.000</div>
-            </div>
-            <div class="card pemasukan">
-                <div class="card-title">Total Pemasukan Bulan Ini</div>
-                <div class="card-value" id="kasTotalPemasukanBulan">Rp 0</div>
-            </div>
-            <div class="card pengeluaran">
-                <div class="card-title">Total Pengeluaran Bulan Ini</div>
-                <div class="card-value" id="kasTotalPengeluaranBulan">Rp 0</div>
-            </div>
-            <div class="card saldo">
-                <div class="card-title">Saldo Kas Akhir</div>
-                <div class="card-value" id="kasSaldoAkhir">Rp 0</div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="form-inline admin-only">
-                <strong>+ Tambah Transaksi Kas:</strong>
-                <input type="date" id="transTanggal">
-                <input type="text" id="transUraian" placeholder="Uraian Transaksi" style="width: 220px;">
-                <select id="transKategori">
-                    <optgroup label="PEMASUKAN">
-                        <option value="in_iuran">Pemasukan: Iuran</option>
-                        <option value="in_jualBola">Pemasukan: Jual Bola</option>
-                        <option value="in_kontribusi">Pemasukan: Kontribusi</option>
-                        <option value="in_lain">Pemasukan: Lain-Lain</option>
-                    </optgroup>
-                    <optgroup label="PENGELUARAN">
-                        <option value="out_beliBola">Pengeluaran: Beli Bola</option>
-                        <option value="out_rapat">Pengeluaran: Rapat</option>
-                        <option value="out_insentif">Pengeluaran: Insentif</option>
-                        <option value="out_sewaLap">Pengeluaran: Sewa Lapangan</option>
-                        <option value="out_persahabatan">Pengeluaran: Persahabatan</option>
-                        <option value="out_lain">Pengeluaran: Lain-Lain</option>
-                    </optgroup>
-                </select>
-                <input type="number" id="transNominal" placeholder="Jumlah (Rp)" style="width: 130px;">
-                <button class="btn-success" onclick="tambahTransaksiKas()">+ Simpan Transaksi</button>
-            </div>
-            <div>
-                <span class="sync-badge">CLOUD SYNC</span> Data tersinkron otomatis antar perangkat secara real-time.
-            </div>
-        </div>
-
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="width: 35px;">NO</th>
-                        <th rowspan="2" style="width: 100px;">Tanggal</th>
-                        <th rowspan="2">URAIAN TRANSAKSI</th>
-                        <th colspan="4" class="header-pemasukan">PEMASUKAN (Rp)</th>
-                        <th colspan="6" class="header-pengeluaran">PENGELUARAN (Rp)</th>
-                        <th rowspan="2" class="header-saldo">SALDO (KUMULATIF)</th>
-                        <th rowspan="2">KET.</th>
-                        <th rowspan="2" class="admin-only">AKSI</th>
-                    </tr>
-                    <tr>
-                        <th class="header-pemasukan">Iuran</th>
-                        <th class="header-pemasukan">Jual Bola</th>
-                        <th class="header-pemasukan">Kontribusi</th>
-                        <th class="header-pemasukan">Lain-Lain</th>
-                        <th class="header-pengeluaran">Beli Bola</th>
-                        <th class="header-pengeluaran">Rapat</th>
-                        <th class="header-pengeluaran">Insentif</th>
-                        <th class="header-pengeluaran">Sewa Lapangan</th>
-                        <th class="header-pengeluaran">Persahabatan</th>
-                        <th class="header-pengeluaran">Lain-Lain</th>
-                    </tr>
-                </thead>
-                <tbody id="kasTableBody"></tbody>
-                <tfoot style="font-weight: bold; background-color: #f1f5f9;">
-                    <tr>
-                        <td colspan="3" class="text-right">TOTAL TRANSAKSI BULAN INI</td>
-                        <td id="bIuran" class="text-right bg-pemasukan">0</td>
-                        <td id="bJualBola" class="text-right bg-pemasukan">0</td>
-                        <td id="bKontribusi" class="text-right bg-pemasukan">0</td>
-                        <td id="bLainIn" class="text-right bg-pemasukan">0</td>
-                        <td id="bBeliBola" class="text-right bg-pengeluaran">0</td>
-                        <td id="bRapat" class="text-right bg-pengeluaran">0</td>
-                        <td id="bInsentif" class="text-right bg-pengeluaran">0</td>
-                        <td id="bSewaLap" class="text-right bg-pengeluaran">0</td>
-                        <td id="bPersahabatan" class="text-right bg-pengeluaran">0</td>
-                        <td id="bLainOut" class="text-right bg-pengeluaran">0</td>
-                        <td id="bSaldoBulan" class="text-right bg-saldo">0</td>
-                        <td></td>
-                        <td class="admin-only"></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-
-    <!-- TAB 2: DAFTAR IURAN ANGGOTA -->
-    <div id="iuran" class="tab-content">
-        <div class="summary-cards">
-            <div class="card">
-                <div class="card-title">Saldo Des 2025 (Awal)</div>
-                <div class="card-value" id="saldoAwalDisplay">Rp 400.000</div>
-            </div>
-            <div class="card pemasukan">
-                <div class="card-title">Total Iuran Terkumpul (2026)</div>
-                <div class="card-value" id="totalIuranDisplay">Rp 0</div>
-            </div>
-            <div class="card saldo">
-                <div class="card-title">Total Akumulasi Iuran</div>
-                <div class="card-value" id="totalSaldoDisplay">Rp 0</div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="form-inline admin-only">
-                <strong>+ Tambah Anggota:</strong>
-                <input type="text" id="namaBaru" placeholder="Nama Anggota Baru...">
-                <button onclick="tambahAnggota()">+ Tambah</button>
-            </div>
-            <div class="form-inline">
-                <label><b>Saldo Awal Des 2025: </b></label>
-                <input type="number" id="inputSaldoAwal" value="400000" style="width: 110px;" onchange="updateSaldoAwal()" disabled>
-            </div>
-        </div>
-
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="width: 35px;">NO</th>
-                        <th rowspan="2">NAMA ANGGOTA</th>
-                        <th colspan="12">IURAN BULANAN (2026) - @ Rp 10.000</th>
-                        <th rowspan="2">TOTAL</th>
-                        <th rowspan="2" class="header-saldo">SALDO AKUMULASI</th>
-                        <th rowspan="2">KET</th>
-                        <th rowspan="2" class="admin-only">AKSI</th>
-                    </tr>
-                    <tr>
-                        <th>Jan</th><th>Feb</th><th class="mar-header">Mar</th><th>Apr</th><th>Mei</th><th>Jun</th>
-                        <th>Jul</th><th>Ags</th><th>Sep</th><th>Okt</th><th>Nop</th><th>Des</th>
-                    </tr>
-                </thead>
-                <tbody id="iuranTableBody"></tbody>
-                <tfoot>
-                    <tr style="font-weight: bold; background-color: #e2e8f0;">
-                        <td colspan="14" class="text-right">TOTAL IURAN TERKUMPUL</td>
-                        <td id="grandTotalIuran" class="text-right">Rp 0</td>
-                        <td id="finalSaldoIuran" class="text-right bg-saldo">Rp 0</td>
-                        <td></td>
-                        <td class="admin-only"></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL LOGIN -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeLoginModal()">&times;</span>
-        <h3>Login Admin</h3>
-        <div id="errorMsg" class="error-msg">Username atau password salah!</div>
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="username" placeholder="Masukkan username">
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="Masukkan password">
-        </div>
-        <button style="width: 100%;" onclick="prosesLogin()">Login</button>
-    </div>
+    <table id="tabelKas">
+        <thead>
+            <tr>
+                <th>NO</th><th>Tanggal</th><th>URAIAN</th>
+                <th>PEMASUKAN</th><th>PENGELUARAN</th>
+                <th>SALDO KUMULATIF</th>
+                <th>KET.</th><th class="admin-only">AKSI</th>
+            </tr>
+        </thead>
+        <tbody id="kasTableBody"></tbody>
+    </table>
 </div>
 
 <script>
-    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyCMjG9thg1hLv7fjZjvRvPicg4rDyWPCaE",
-        authDomain: "pb-sinar-pagi.firebaseapp.com",
         databaseURL: "https://pb-sinar-pagi-default-rtdb.firebaseio.com",
-        projectId: "pb-sinar-pagi",
-        storageBucket: "pb-sinar-pagi.firebasestorage.app",
-        messagingSenderId: "980167000610",
-        appId: "1:980167000610:web:8bb4150ce7000d4ee8407b"
+        projectId: "pb-sinar-pagi"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const NOMINAL_IURAN = 10000;
-    let saldoAwalIuran = 400000;
-    let isAdminLoggedIn = false;
-
-    const saldoSebelumnyaKas = {
-        iuran: 3160000, jualBola: 25650000, kontribusi: 7400000, lainIn: 1480000,
-        beliBola: 16320000, rapat: 824500, insentif: 2750000, sewaLap: 3200000,
-        persahabatan: 9263000, lainOut: 4782500, saldo: 550000
-    };
-
+    let isAdmin = false;
     let transaksiKas = [];
-    let dataAnggota = [];
+    let saldoAwal = 550000;
 
-    // --- MENGHUBUNGKAN KE CLOUD REALTIME DATABASE ---
-    db.ref('keuangan').on('value', (snapshot) => {
-        const data = snapshot.val();
-        document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
-        document.getElementById('dbStatus').style.background = '#dcfce7';
-        document.getElementById('dbStatus').style.color = '#15803d';
-
-        if (data) {
-            transaksiKas = data.transaksiKas || [];
-            dataAnggota = data.dataAnggota || [];
-            saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
-            document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
-        } else {
-            simpanKeCloudInit();
-        }
-        renderIuran();
-    }, (error) => {
-        document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
-        document.getElementById('dbStatus').style.background = '#fee2e2';
-        document.getElementById('dbStatus').style.color = '#b91c1c';
-        renderIuran();
+    // Load Data
+    db.ref('keuangan').on('value', (snap) => {
+        let data = snap.val();
+        transaksiKas = data ? (data.transaksiKas || []) : [];
+        renderTable();
     });
 
-    function simpanKeCloudInit() {
-        db.ref('keuangan').set({
-            transaksiKas: transaksiKas,
-            dataAnggota: dataAnggota,
-            saldoAwal: saldoAwalIuran
-        });
-    }
-
-    function simpanKeCloud() {
-        if (!isAdminLoggedIn) return;
-        db.ref('keuangan').set({
-            transaksiKas: transaksiKas,
-            dataAnggota: dataAnggota,
-            saldoAwal: saldoAwalIuran
-        });
-    }
-
-    /* SYSTEM AUTENTIKASI */
-    function openLoginModal() { document.getElementById('loginModal').style.display = 'block'; }
-    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('errorMsg').style.display = 'none'; }
-
-    function prosesLogin() {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
-
-        if (u === 'admin' && p === 'Admin@2026') {
-            isAdminLoggedIn = true;
-            closeLoginModal();
-            updateAuthUI();
-        } else {
-            document.getElementById('errorMsg').style.display = 'block';
-        }
-    }
-
-    function logoutAdmin() {
-        isAdminLoggedIn = false;
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-        updateAuthUI();
-    }
-
-    function updateAuthUI() {
-        const container = document.getElementById('mainContainer');
-        const userStatus = document.getElementById('userStatus');
-        const btnLogin = document.getElementById('btnLogin');
-        const btnLogout = document.getElementById('btnLogout');
-        const inputSaldo = document.getElementById('inputSaldoAwal');
-
-        if (isAdminLoggedIn) {
-            container.classList.add('admin-mode');
-            userStatus.innerHTML = 'Status: <span style="color: var(--primary);">Admin (Full Access)</span>';
-            btnLogin.style.display = 'none';
-            btnLogout.style.display = 'inline-block';
-            inputSaldo.removeAttribute('disabled');
-        } else {
-            container.classList.remove('admin-mode');
-            userStatus.innerHTML = 'Status: <span>Pengunjung (Read-Only)</span>';
-            btnLogin.style.display = 'inline-block';
-            btnLogout.style.display = 'none';
-            inputSaldo.setAttribute('disabled', 'true');
-        }
-        renderIuran();
-    }
-
-    function formatRupiah(num) {
-        if (!num || num === 0) return "-";
-        return num.toLocaleString('id-ID');
-    }
-
-    function openTab(tabName, evt) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabName).classList.add('active');
-        evt.currentTarget.classList.add('active');
-    }
-
-    function syncIuranToKas() {
-        let totalIuranAgustus = 0;
-        dataAnggota.forEach(m => {
-            if (m.iuran && m.iuran[7] === 1) totalIuranAgustus += NOMINAL_IURAN;
-        });
-
-        let iuranTrans = transaksiKas.find(t => t.isSyncIuran);
-        if (iuranTrans) {
-            iuranTrans.nominal = totalIuranAgustus;
-        }
-    }
-
-    function renderBukuKas() {
-        syncIuranToKas();
+    function renderTable() {
         const tbody = document.getElementById('kasTableBody');
         tbody.innerHTML = '';
-
-        tbody.innerHTML += `
-            <tr style="font-style: italic; background-color: #f8fafc;">
-                <td></td><td>30/07/2026</td>
-                <td class="text-left">Saldo Transaksi Bulan Sebelumnya</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(saldoSebelumnyaKas.iuran)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(saldoSebelumnyaKas.jualBola)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(saldoSebelumnyaKas.kontribusi)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(saldoSebelumnyaKas.lainIn)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.beliBola)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.rapat)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.insentif)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.sewaLap)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.persahabatan)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(saldoSebelumnyaKas.lainOut)}</td>
-                <td class="text-right bg-saldo">${formatRupiah(saldoSebelumnyaKas.saldo)}</td>
-                <td></td>
-                <td class="admin-only"></td>
-            </tr>
-        `;
-
-        let currentSaldo = saldoSebelumnyaKas.saldo;
-        let b = { iuran:0, jualBola:0, kontribusi:0, lainIn:0, beliBola:0, rapat:0, insentif:0, sewaLap:0, persahabatan:0, lainOut:0 };
+        let currentSaldo = saldoAwal;
+        let totalIn = 0; let totalOut = 0;
 
         transaksiKas.forEach((t, index) => {
-            let pIn = { iuran:0, jualBola:0, kontribusi:0, lainIn:0 };
-            let pOut = { beliBola:0, rapat:0, insentif:0, sewaLap:0, persahabatan:0, lainOut:0 };
+            let isMasuk = t.kategori.startsWith('in_');
+            currentSaldo += isMasuk ? t.nominal : -t.nominal;
+            if(isMasuk) totalIn += t.nominal; else totalOut += t.nominal;
 
-            if (t.kategori === "multi" && t.multiDetail) {
-                for (let k in t.multiDetail) {
-                    let key = k.replace('out_', '');
-                    pOut[key] = t.multiDetail[k];
-                    b[key] += t.multiDetail[k];
-                }
-                currentSaldo -= t.nominal;
-            } else if (t.kategori.startsWith('in_')) {
-                let key = t.kategori.replace('in_', '');
-                pIn[key] = t.nominal;
-                b[key] += t.nominal;
-                currentSaldo += t.nominal;
-            } else if (t.kategori.startsWith('out_')) {
-                let key = t.kategori.replace('out_', '');
-                pOut[key] = t.nominal;
-                b[key] += t.nominal;
-                currentSaldo -= t.nominal;
-            }
-
-            let disabledInput = isAdminLoggedIn ? '' : 'disabled';
-
-            let tr = document.createElement('tr');
+            const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${t.tanggal}</td>
-                <td class="text-left">${t.uraian} ${t.isSyncIuran ? '<span class="sync-badge">Auto Sync</span>' : ''}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(pIn.iuran)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(pIn.jualBola)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(pIn.kontribusi)}</td>
-                <td class="text-right bg-pemasukan">${formatRupiah(pIn.lainIn)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.beliBola)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.rapat)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.insentif)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.sewaLap)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.persahabatan)}</td>
-                <td class="text-right bg-pengeluaran">${formatRupiah(pOut.lainOut)}</td>
-                <td class="text-right bg-saldo">${formatRupiah(currentSaldo)}</td>
-                <td><input type="text" value="${t.ket || ''}" style="width:70px; font-size:0.75rem;" ${disabledInput} onchange="updateKetKas(${index}, this.value)"></td>
+                <td style="text-align:left">${t.uraian}</td>
+                <td style="color:green">${isMasuk ? 'Rp ' + t.nominal.toLocaleString() : '-'}</td>
+                <td style="color:red">${!isMasuk ? 'Rp ' + t.nominal.toLocaleString() : '-'}</td>
+                <td class="bg-saldo">Rp ${currentSaldo.toLocaleString()}</td>
+                <td><input value="${t.ket || ''}" style="border:none; background:transparent; width:100%; text-align:center;" onchange="updateKet(${index}, this.value)" ${isAdmin ? '' : 'disabled'}></td>
                 <td class="admin-only">
-                    ${t.isSyncIuran ? '-' : `
-                        <button class="btn-edit" onclick="editKas(${index})">Edit</button>
-                        <button class="btn-danger" onclick="hapusKas(${index})">Hapus</button>
-                    `}
+                    <button class="btn edit" onclick="editData(${index})">Edit</button>
+                    <button class="btn hapus" onclick="hapusData(${index})">Hapus</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
 
-        document.getElementById('bIuran').innerText = formatRupiah(b.iuran);
-        document.getElementById('bJualBola').innerText = formatRupiah(b.jualBola);
-        document.getElementById('bKontribusi').innerText = formatRupiah(b.kontribusi);
-        document.getElementById('bLainIn').innerText = formatRupiah(b.lainIn);
-        document.getElementById('bBeliBola').innerText = formatRupiah(b.beliBola);
-        document.getElementById('bRapat').innerText = formatRupiah(b.rapat);
-        document.getElementById('bInsentif').innerText = formatRupiah(b.insentif);
-        document.getElementById('bSewaLap').innerText = formatRupiah(b.sewaLap);
-        document.getElementById('bPersahabatan').innerText = formatRupiah(b.persahabatan);
-        document.getElementById('bLainOut').innerText = formatRupiah(b.lainOut);
-        document.getElementById('bSaldoBulan').innerText = formatRupiah(currentSaldo);
-
-        let totalInBulan = b.iuran + b.jualBola + b.kontribusi + b.lainIn;
-        let totalOutBulan = b.beliBola + b.rapat + b.insentif + b.sewaLap + b.persahabatan + b.lainOut;
-        
-        document.getElementById('kasTotalPemasukanBulan').innerText = "Rp " + formatRupiah(totalInBulan);
-        document.getElementById('kasTotalPengeluaranBulan').innerText = "Rp " + formatRupiah(totalOutBulan);
-        document.getElementById('kasSaldoAkhir').innerText = "Rp " + formatRupiah(currentSaldo);
+        document.getElementById('valMasuk').innerText = 'Rp ' + totalIn.toLocaleString();
+        document.getElementById('valKeluar').innerText = 'Rp ' + totalOut.toLocaleString();
+        document.getElementById('valSaldo').innerText = 'Rp ' + currentSaldo.toLocaleString();
     }
 
-    function updateKetKas(index, val) {
-        if (!isAdminLoggedIn) return;
-        transaksiKas[index].ket = val;
-        simpanKeCloud();
-    }
-
-    function tambahTransaksiKas() {
-        if (!isAdminLoggedIn) return;
-        let tgl = document.getElementById('transTanggal').value;
-        let uraian = document.getElementById('transUraian').value.trim();
-        let kat = document.getElementById('transKategori').value;
-        let nominal = parseInt(document.getElementById('transNominal').value) || 0;
-
-        if (!uraian || nominal <= 0) {
-            alert("Harap isi Uraian dan Nominal Transaksi!");
-            return;
-        }
-
-        if (!tgl) {
-            let today = new Date();
-            tgl = String(today.getDate()).padStart(2, '0') + '/' + String(today.getMonth()+1).padStart(2, '0') + '/' + today.getFullYear();
-        } else {
-            let parts = tgl.split('-');
-            if (parts.length === 3) tgl = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
-        transaksiKas.push({ id: Date.now(), tanggal: tgl, uraian: uraian, kategori: kat, nominal: nominal, isSyncIuran: false, ket: "" });
-        document.getElementById('transUraian').value = '';
-        document.getElementById('transNominal').value = '';
-        simpanKeCloud();
-    }
-
-    function editKas(index) {
-        if (!isAdminLoggedIn) return;
-        let t = transaksiKas[index];
-        let newUraian = prompt("Ubah Uraian Transaksi:", t.uraian);
-        let newNominal = prompt("Ubah Nominal Transaksi:", t.nominal);
-
-        if (newUraian !== null && newNominal !== null) {
-            transaksiKas[index].uraian = newUraian.trim();
-            transaksiKas[index].nominal = parseInt(newNominal) || 0;
-            simpanKeCloud();
+    function editData(index) {
+        let n = prompt("Nominal Baru:", transaksiKas[index].nominal);
+        let u = prompt("Uraian Baru:", transaksiKas[index].uraian);
+        if(n && u) {
+            transaksiKas[index].nominal = parseInt(n);
+            transaksiKas[index].uraian = u;
+            save();
         }
     }
 
-    function hapusKas(index) {
-        if (!isAdminLoggedIn) return;
-        if (confirm("Hapus transaksi kas ini?")) {
+    function hapusData(index) {
+        if(confirm("Hapus transaksi ini?")) {
             transaksiKas.splice(index, 1);
-            simpanKeCloud();
+            save();
         }
     }
 
-    function renderIuran() {
-        const tbody = document.getElementById('iuranTableBody');
-        tbody.innerHTML = '';
-        
-        let runningSaldo = saldoAwalIuran;
-        let totalSeluruhIuran = 0;
-
-        dataAnggota.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            const totalBulanTerbayar = item.iuran ? item.iuran.reduce((a, b) => a + b, 0) : 0;
-            const totalBayar = totalBulanTerbayar * NOMINAL_IURAN;
-            
-            totalSeluruhIuran += totalBayar;
-            runningSaldo += totalBayar;
-
-            let disabledAttr = isAdminLoggedIn ? '' : 'disabled';
-            let editAction = isAdminLoggedIn ? `onclick="editNama(${index})"` : '';
-
-            let rowHtml = `
-                <td>${index + 1}</td>
-                <td class="text-left editable-name" ${editAction}>${item.nama}</td>
-            `;
-
-            (item.iuran || Array(12).fill(0)).forEach((val, bulanIdx) => {
-                const isMar = bulanIdx === 2 ? 'mar-cell' : '';
-                const checked = val === 1 ? 'checked' : '';
-                rowHtml += `
-                    <td class="${isMar}">
-                        <input type="checkbox" class="checkbox-iuran" ${checked} ${disabledAttr} onchange="toggleIuran(${index}, ${bulanIdx})">
-                    </td>
-                `;
-            });
-
-            rowHtml += `
-                <td class="text-right">${formatRupiah(totalBayar)}</td>
-                <td class="text-right bg-saldo">${formatRupiah(runningSaldo)}</td>
-                <td><input type="text" value="${item.ket || ''}" style="width: 80px; font-size:0.75rem;" ${disabledAttr} onchange="updateKetIuran(${index}, this.value)"></td>
-                <td class="admin-only"><button class="btn-danger" onclick="hapusAnggota(${index})">Hapus</button></td>
-            `;
-
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
-        });
-
-        document.getElementById('saldoAwalDisplay').innerText = "Rp " + formatRupiah(saldoAwalIuran);
-        document.getElementById('totalIuranDisplay').innerText = "Rp " + formatRupiah(totalSeluruhIuran);
-        document.getElementById('totalSaldoDisplay').innerText = "Rp " + formatRupiah(runningSaldo);
-        document.getElementById('grandTotalIuran').innerText = "Rp " + formatRupiah(totalSeluruhIuran);
-        document.getElementById('finalSaldoIuran').innerText = "Rp " + formatRupiah(runningSaldo);
-
-        renderBukuKas();
+    function save() {
+        db.ref('keuangan').set({ transaksiKas: transaksiKas });
+        renderTable();
     }
 
-    function toggleIuran(indexAnggota, indexBulan) {
-        if (!isAdminLoggedIn) return;
-        if (!dataAnggota[indexAnggota].iuran) dataAnggota[indexAnggota].iuran = Array(12).fill(0);
-        dataAnggota[indexAnggota].iuran[indexBulan] = dataAnggota[indexAnggota].iuran[indexBulan] === 1 ? 0 : 1;
-        simpanKeCloud();
-    }
-
-    function updateKetIuran(index, val) {
-        if (!isAdminLoggedIn) return;
-        dataAnggota[index].ket = val;
-        simpanKeCloud();
-    }
-
-    function editNama(index) {
-        if (!isAdminLoggedIn) return;
-        const namaBaru = prompt("Ubah Nama Anggota:", dataAnggota[index].nama);
-        if (namaBaru !== null && namaBaru.trim() !== "") {
-            dataAnggota[index].nama = namaBaru.trim();
-            simpanKeCloud();
+    function prosesLogin() {
+        if(prompt("Password Admin:") === "Admin@2026") {
+            isAdmin = true;
+            document.getElementById('mainContainer').classList.add('admin-mode');
+            document.getElementById('btnLogin').style.display = 'none';
+            document.getElementById('btnLogout').style.display = 'inline-block';
+            document.getElementById('userStatus').innerText = "Status: Admin";
         }
     }
 
-    function tambahAnggota() {
-        if (!isAdminLoggedIn) return;
-        const inputNama = document.getElementById('namaBaru');
-        const nama = inputNama.value.trim();
-        if (!nama) return alert("Nama tidak boleh kosong!");
-
-        dataAnggota.push({ nama: nama, iuran: [0,0,0,0,0,0,0,0,0,0,0,0], ket: "" });
-        inputNama.value = "";
-        simpanKeCloud();
+    function logoutAdmin() {
+        isAdmin = false;
+        document.getElementById('mainContainer').classList.remove('admin-mode');
+        document.getElementById('btnLogin').style.display = 'inline-block';
+        document.getElementById('btnLogout').style.display = 'none';
+        document.getElementById('userStatus').innerText = "Status: Pengunjung";
     }
-
-    function hapusAnggota(index) {
-        if (!isAdminLoggedIn) return;
-        if (confirm(`Yakin ingin menghapus ${dataAnggota[index].nama}?`)) {
-            dataAnggota.splice(index, 1);
-            simpanKeCloud();
-        }
-    }
-
-    function updateSaldoAwal() {
-        if (!isAdminLoggedIn) return;
-        saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
-        simpanKeCloud();
-    }
-
-    updateAuthUI();
 </script>
-
 </body>
 </html>
