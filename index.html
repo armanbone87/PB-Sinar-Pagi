@@ -48,69 +48,190 @@
             gap: 10px;
         }
 
-        .user-status { margin-right: auto; font-weight: 600; font-size: 0.9rem; }
-        .db-status { font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; background: #e2e8f0; font-weight: bold; }
-
-        .btn-login, .btn-logout {
-            color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
+        .user-status {
+            margin-right: auto;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
+
+        .db-status {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            font-weight: bold;
+        }
+
+        .btn-login, .btn-logout, .btn-save-all, .btn-reset {
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
         .btn-login { background-color: var(--primary); }
         .btn-logout { background-color: var(--accent); display: none; }
 
         .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
         }
+
         .modal-content {
-            background-color: #fff; margin: 12% auto; padding: 25px; border-radius: 10px; width: 320px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative;
+            background-color: #fff;
+            margin: 12% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
         }
+
         .modal-content h3 { margin-top: 0; color: var(--primary); }
+
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
-        .close-btn { position: absolute; right: 15px; top: 15px; cursor: pointer; font-size: 20px; font-weight: bold; color: #64748b; }
-        .error-msg { color: var(--accent); font-size: 0.8rem; margin-bottom: 10px; display: none; }
 
-        header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        .error-msg {
+            color: var(--accent);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 15px;
+        }
+
         h1 { margin: 5px 0; color: var(--primary); font-size: 1.8rem; text-transform: uppercase; }
         h2 { margin: 0; color: #475569; font-size: 1.2rem; font-weight: 600; }
 
-        .nav-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
-        .tab-btn {
-            background: #e2e8f0; border: none; padding: 12px 24px; font-size: 1rem; font-weight: bold; color: #475569; cursor: pointer; border-radius: 8px 8px 0 0; transition: all 0.2s;
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
         }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
+
+        .tab-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #475569;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: #f1f5f9; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+        }
+
         .card.pemasukan { border-left-color: var(--pemasukan-header); background: #f0f9ff; }
         .card.pengeluaran { border-left-color: var(--pengeluaran-header); background: #f0fdf4; }
         .card.saldo { border-left-color: var(--saldo-header); background: #faf5ff; }
+
         .card-title { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: bold; }
         .card-value { font-size: 1.4rem; font-weight: bold; margin-top: 5px; }
 
         .controls {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-        }
-        .form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        input[type="text"], input[type="number"], input[type="date"], select {
-            padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
-        button { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .form-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        input[type="text"], input[type="number"], input[type="date"], select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
         button:hover { opacity: 0.9; }
         .btn-success { background-color: #10b981; }
-        .btn-danger { background-color: var(--accent); padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; }
-        .btn-edit { background-color: #3b82f6; padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; margin-right: 2px; }
+        .btn-danger { background-color: var(--accent); padding: 4px 8px; font-size: 0.75rem; }
+        .btn-edit { background-color: #3b82f6; padding: 4px 8px; font-size: 0.75rem; margin-right: 4px; }
 
-        .table-responsive { overflow-x: auto; max-height: 600px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: center; background: white; }
         th, td { border: 1px solid var(--border); padding: 8px 6px; white-space: nowrap; }
         thead { position: sticky; top: 0; background-color: #f1f5f9; z-index: 10; }
 
         th.mar-header, td.mar-cell { background-color: #fee2e2; color: #991b1b; }
         .checkbox-iuran { cursor: pointer; width: 17px; height: 17px; }
+
         td.text-left { text-align: left; padding-left: 10px; }
         td.text-right { text-align: right; padding-right: 10px; }
 
@@ -126,7 +247,15 @@
         .bg-pengeluaran { background-color: #f0fdf4; }
         .bg-saldo { background-color: #faf5ff; font-weight: bold; }
 
-        .sync-badge { background: #8b5cf6; color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .sync-badge {
+            background: #8b5cf6;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
         .admin-only { display: none !important; }
         .admin-mode .admin-only { display: inline-flex !important; }
         .admin-mode tr.admin-only, .admin-mode div.admin-only { display: flex !important; }
@@ -148,22 +277,6 @@
         <h1>SISTEM KEUANGAN & BUKU KAS UMUM TAHUN 2026</h1>
     </header>
 
-    <!-- PILIH PERIODE BULAN -->
-    <div class="controls" style="background: #e2e8f0; margin-bottom: 20px;">
-        <div class="form-inline">
-            <label><b>📅 Pilih Periode Bulan: </b></label>
-            <select id="selectBulan" onchange="gantiBulan()" style="font-weight: bold; color: var(--primary);">
-                <option value="2026-07">Juli 2026</option>
-                <option value="2026-08" selected>Agustus 2026</option>
-                <option value="2026-09">September 2026</option>
-                <option value="2026-10">Oktober 2026</option>
-            </select>
-        </div>
-        <div>
-            <span class="sync-badge">MULTI-BULAN & CLOUD SYNC</span>
-        </div>
-    </div>
-
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('kas', event)">📖 BUKU KAS UMUM</button>
         <button class="tab-btn" onclick="openTab('iuran', event)">📋 DAFTAR IURAN ANGGOTA</button>
@@ -173,8 +286,8 @@
     <div id="kas" class="tab-content active">
         <div class="summary-cards">
             <div class="card">
-                <div class="card-title">Saldo Lalu</div>
-                <div class="card-value" id="cardSaldoLalu">Rp 550.000</div>
+                <div class="card-title">Saldo Lalu (30/07/2026)</div>
+                <div class="card-value">Rp 550.000</div>
             </div>
             <div class="card pemasukan">
                 <div class="card-title">Total Pemasukan Bulan Ini</div>
@@ -213,6 +326,9 @@
                 </select>
                 <input type="number" id="transNominal" placeholder="Jumlah (Rp)" style="width: 130px;">
                 <button class="btn-success" onclick="tambahTransaksiKas()">+ Simpan Transaksi</button>
+            </div>
+            <div>
+                <span class="sync-badge">CLOUD SYNC</span> Data tersinkron otomatis antar perangkat secara real-time.
             </div>
         </div>
 
@@ -345,6 +461,7 @@
 </div>
 
 <script>
+    // --- KONFIGURASI FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyCMjG9thg1hLv7fjZjvRvPicg4rDyWPCaE",
         authDomain: "pb-sinar-pagi.firebaseapp.com",
@@ -361,109 +478,53 @@
     const NOMINAL_IURAN = 10000;
     let saldoAwalIuran = 400000;
     let isAdminLoggedIn = false;
-    let bulanAktif = "2026-08"; // Default bulan aktif
 
-    // Saldo awal bawaan jika bulan sebelumnya belum ada
-    let saldoSebelumnyaKas = { saldo: 550000, iuran: 0, jualBola: 0, kontribusi: 0, lainIn: 0, beliBola: 0, rapat: 0, insentif: 0, sewaLap: 0, persahabatan: 0, lainOut: 0 };
+    const saldoSebelumnyaKas = {
+        iuran: 3160000, jualBola: 25650000, kontribusi: 7400000, lainIn: 1480000,
+        beliBola: 16320000, rapat: 824500, insentif: 2750000, sewaLap: 3200000,
+        persahabatan: 9263000, lainOut: 4782500, saldo: 550000
+    };
+
     let transaksiKas = [];
-    let dataAnggota = [
-        { nama: "Ust IRWAN", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "Maret puasa" },
-        { nama: "BAHAR", iuran: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "KADRI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "A.EDI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "IBRAHIM", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
-        { nama: "AWI", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "HARMAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "CINO", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "HENGKI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.RUSDI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0], ket: "" },
-        { nama: "SYAM", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "IMRAN", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "INDRA", iuran: [1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "P.YUS", iuran: [1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "ANTO Dispenda", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "MASDAR", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
-        { nama: "DhausJie", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.ICCANG", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "RIVAL", iuran: [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "H.SUNDU", iuran: [0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "A.ROBY", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.FAHRI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "SABRI", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "YUDHI", iuran: [1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.TAHAR", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "AAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "JUMAING", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "YesSAFRI", iuran: [1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.KARMAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "PABO", iuran: [0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "YONO", iuran: [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "KEVIN", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "AGUS.M", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "AGUS ASKARI", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "MARDI", iuran: [0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "SOEHA", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "HENRIK", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "ALI", iuran: [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "MASKITIN", iuran: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "HAERUL", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "H.ABUSTAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], ket: "" },
-        { nama: "ARDIAN", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "A.KOMAR", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1], ket: "" },
-        { nama: "A.ALFIAN", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "FIRDAUS Sijelling", iuran: [1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], ket: "" },
-        { nama: "BENTO", iuran: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "SAMIR", iuran: [1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "MUHSIN", iuran: [0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "A.ACO", iuran: [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "WIRA", iuran: [1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "RUSLI", iuran: [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], ket: "" },
-        { nama: "ANTO B", iuran: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "ZULFIQAR", iuran: [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], ket: "" },
-        { nama: "IRHAM", iuran: [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0], ket: "" },
-        { nama: "IBNU", iuran: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], ket: "" }
-    ];
+    let dataAnggota = [];
 
-    // Ganti Periode Bulan
-    function gantiBulan() {
-        bulanAktif = document.getElementById('selectBulan').value;
-        muatDataBulan();
-    }
+    // --- MENGHUBUNGKAN KE CLOUD REALTIME DATABASE ---
+    db.ref('keuangan').on('value', (snapshot) => {
+        const data = snapshot.val();
+        document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
+        document.getElementById('dbStatus').style.background = '#dcfce7';
+        document.getElementById('dbStatus').style.color = '#15803d';
 
-    function muatDataBulan() {
-        db.ref('keuangan/' + bulanAktif).on('value', (snapshot) => {
-            const data = snapshot.val();
-            document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
-            document.getElementById('dbStatus').style.background = '#dcfce7';
-            document.getElementById('dbStatus').style.color = '#15803d';
+        if (data) {
+            transaksiKas = data.transaksiKas || [];
+            dataAnggota = data.dataAnggota || [];
+            saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
+            document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
+        } else {
+            simpanKeCloudInit();
+        }
+        renderIuran();
+    }, (error) => {
+        document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
+        document.getElementById('dbStatus').style.background = '#fee2e2';
+        document.getElementById('dbStatus').style.color = '#b91c1c';
+        renderIuran();
+    });
 
-            if (data) {
-                transaksiKas = data.transaksiKas || [];
-                dataAnggota = data.dataAnggota || dataAnggota;
-                saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
-                if (data.saldoSebelumnyaKas) saldoSebelumnyaKas = data.saldoSebelumnyaKas;
-                document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
-            } else {
-                // Jika bulan baru belum ada data, inisialisasi default kosong
-                transaksiKas = [];
-                simpanKeCloud();
-            }
-            renderIuran();
-        }, (error) => {
-            document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
-            document.getElementById('dbStatus').style.background = '#fee2e2';
-            document.getElementById('dbStatus').style.color = '#b91c1c';
-            renderIuran();
+    function simpanKeCloudInit() {
+        db.ref('keuangan').set({
+            transaksiKas: transaksiKas,
+            dataAnggota: dataAnggota,
+            saldoAwal: saldoAwalIuran
         });
     }
 
     function simpanKeCloud() {
         if (!isAdminLoggedIn) return;
-        db.ref('keuangan/' + bulanAktif).set({
+        db.ref('keuangan').set({
             transaksiKas: transaksiKas,
             dataAnggota: dataAnggota,
-            saldoAwal: saldoAwalIuran,
-            saldoSebelumnyaKas: saldoSebelumnyaKas
+            saldoAwal: saldoAwalIuran
         });
     }
 
@@ -542,8 +603,6 @@
         syncIuranToKas();
         const tbody = document.getElementById('kasTableBody');
         tbody.innerHTML = '';
-
-        document.getElementById('cardSaldoLalu').innerText = "Rp " + formatRupiah(saldoSebelumnyaKas.saldo);
 
         tbody.innerHTML += `
             <tr style="font-style: italic; background-color: #f8fafc;">
@@ -789,12 +848,10 @@
 
     function updateSaldoAwal() {
         if (!isAdminLoggedIn) return;
-        saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal')->value) || 0; // Fixed value parser
+        saldoAwalIuran = parseInt(document.getElementById('inputSaldoAwal').value) || 0;
         simpanKeCloud();
     }
 
-    // Load data awal saat pertama dibuka
-    muatDataBulan();
     updateAuthUI();
 </script>
 
