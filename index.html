@@ -361,7 +361,7 @@
     const NOMINAL_IURAN = 10000;
     let saldoAwalIuran = 400000;
     let isAdminLoggedIn = false;
-    let bulanAktif = "2026-08"; // Default bulan aktif
+    let bulanAktif = "2026-08";
 
     let saldoSebelumnyaKas = { saldo: 550000, iuran: 3160000, jualBola: 25650000, kontribusi: 7400000, lainIn: 1480000, beliBola: 16320000, rapat: 824500, insentif: 2750000, sewaLap: 3200000, persahabatan: 9263000, lainOut: 4782500 };
     let transaksiKas = [];
@@ -429,23 +429,35 @@
     }
 
     function muatDataBulan() {
+        // Cek data di path spesifik bulan, jika kosong fallback ke root 'keuangan' agar data lama langsung muncul
         db.ref('keuangan/' + bulanAktif).on('value', (snapshot) => {
             const data = snapshot.val();
             document.getElementById('dbStatus').innerHTML = '🟢 Terhubung Cloud';
             document.getElementById('dbStatus').style.background = '#dcfce7';
             document.getElementById('dbStatus').style.color = '#15803d';
 
-            if (data) {
+            if (data && (data.transaksiKas || data.dataAnggota)) {
                 transaksiKas = data.transaksiKas || [];
                 dataAnggota = data.dataAnggota || dataAnggota;
                 saldoAwalIuran = data.saldoAwal !== undefined ? data.saldoAwal : 400000;
                 if (data.saldoSebelumnyaKas) saldoSebelumnyaKas = data.saldoSebelumnyaKas;
                 document.getElementById('inputSaldoAwal').value = saldoAwalIuran;
+                renderIuran();
             } else {
-                transaksiKas = [];
-                simpanKeCloud();
+                // Fallback cek ke root 'keuangan' (tempat data lama Anda tersimpan)
+                db.ref('keuangan').once('value', (rootSnap) => {
+                    const rootData = rootSnap.val();
+                    if (rootData && bulanAktif === "2026-08") {
+                        transaksiKas = rootData.transaksiKas || [];
+                        dataAnggota = rootData.dataAnggota || dataAnggota;
+                        saldoAwalIuran = rootData.saldoAwal !== undefined ? rootData.saldoAwal : 400000;
+                        if (rootData.saldoSebelumnyaKas) saldoSebelumnyaKas = rootData.saldoSebelumnyaKas;
+                    } else {
+                        transaksiKas = [];
+                    }
+                    renderIuran();
+                });
             }
-            renderIuran();
         }, (error) => {
             document.getElementById('dbStatus').innerHTML = '🔴 Gagal Cloud';
             document.getElementById('dbStatus').style.background = '#fee2e2';
@@ -462,6 +474,15 @@
             saldoAwal: saldoAwalIuran,
             saldoSebelumnyaKas: saldoSebelumnyaKas
         });
+        // Simpan juga ke root agar sinkron dengan struktur lama jika di bulan Agustus
+        if (bulanAktif === "2026-08") {
+            db.ref('keuangan').set({
+                transaksiKas: transaksiKas,
+                dataAnggota: dataAnggota,
+                saldoAwal: saldoAwalIuran,
+                saldoSebelumnyaKas: saldoSebelumnyaKas
+            });
+        }
     }
 
     function openLoginModal() { document.getElementById('loginModal').style.display = 'block'; }
